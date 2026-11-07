@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Management System | EventFlow</title>
+
+<!-- ========== SECTION 1: FONTS AND STYLES ========== -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy: #17233b;
+  --blue: #3157a4;
+  --blue2: #5579d2;
+  --gold: #f4c96b;
+  --pink: #f0a5bd;
+  --paper: #f4f7fc;
+  --white: #ffffff;
+  --muted: #667085;
+  --line: #dfe6f1;
+  --shadow: 0 22px 60px #243b681c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "DM Sans", sans-serif;
+  background: var(--paper);
+  color: var(--navy);
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  filter: blur(65px);
+  opacity: .30;
+  pointer-events: none;
+  animation: floatBlob 14s ease-in-out infinite alternate;
+}
+
+body::before {
+  background: #a8baff;
+  top: 10%;
+  left: -180px;
+}
+
+body::after {
+  background: #ffd2df;
+  right: -180px;
+  bottom: 5%;
+  animation-delay: -7s;
+}
+
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; }
+button, a { cursor: pointer; }
+img { max-width: 100%; display: block; }
+.serif { font-family: "Playfair Display", serif; }
+
+.container {
+  width: min(1180px, 91%);
+  margin: auto;
+}
+
+.page-hidden { display: none !important; }
+
+.page-enter {
+  animation: pageEnter .55s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(20px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes floatBlob {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(60px, -35px) scale(1.15); }
+}
+
+@keyframes photoZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.12); }
+}
+
+@keyframes shimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 0 0 #f4c96b30; }
+  50% { box-shadow: 0 0 0 10px #f4c96b00; }
+}
+
+.btn {
+  border: 0;
+  border-radius: 30px;
+  padding: 13px 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 800;
+  transition: .25s;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px #17233b20;
+}
+
+.btn-blue { background: var(--blue); color: white; }
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-outline { background: transparent; border: 1px solid #d2daeb; color: var(--navy); }
+
+.kicker {
+  color: var(--blue);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.heading {
+  font: 500 clamp(32px, 4vw, 50px)/1.15 "Playfair Display", serif;
+  margin: 12px 0;
+}
+
+.intro {
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.section { padding: 65px 0; }
+
+input, select, textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 13px;
+  background: white;
+  color: var(--navy);
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--blue2);
+  box-shadow: 0 0 0 3px #5579d21c;
+}
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+.field { margin-bottom: 14px; }
+
+.grid { display: grid; gap: 20px; }
+
+/* ========== SECTION 2: NAVIGATION ========== */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #ffffffed;
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav-inner {
+  width: min(1220px, 93%);
+  min-height: 76px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 20px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.logo-mark {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--blue), var(--navy));
+  color: var(--gold);
+  border-radius: 13px;
+  font-size: 21px;
+}
+
+.logo span:last-child { color: var(--blue); }
+
+.nav-links {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.nav-links a {
+  position: relative;
+  padding: 8px 0;
+  color: #555f76;
+  transition: color .2s;
+}
+
+.nav-links a:hover,
+.nav-links a.nav-current { color: var(--blue); }
+
+.nav-links a.nav-current::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 4px;
+}
+
+.menu-toggle { display: none; }
+
+/* ========== SECTION 3: HOME PAGE ========== */
+
+.hero { padding: 28px 0 35px; }
+
+.hero-shell {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 550px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: linear-gradient(130deg, #fff, #e7edff 60%, #ffedf2);
+  box-shadow: var(--shadow);
+}
+
+.hero-copy {
+  padding: clamp(30px, 5vw, 65px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  animation: pageEnter .8s both;
+}
+
+.hero-copy h1 {
+  font: 500 clamp(43px, 5.3vw, 72px)/1.03 "Playfair Display", serif;
+  letter-spacing: -2px;
+  margin: 23px 0;
+}
+
+.hero-copy h1 span {
+  color: var(--blue);
+  background: linear-gradient(100deg, var(--blue), #8a67d9, #dc779b, var(--blue));
+  background-size: 250% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 7s linear infinite alternate;
+}
+
+.hero-copy p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.9;
+  max-width: 450px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 25px;
+}
+
+.hero-note {
+  margin-top: 30px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.hero-visual {
+  position: relative;
+  min-height: 470px;
+  overflow: hidden;
+  background: #9db2e0;
+}
+
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, #111b39a8, transparent 58%),
+    url("https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=90")
+    center/cover;
+  animation: photoZoom 18s ease-in-out infinite alternate;
+}
+
+.hero-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(130deg, #3157a425, transparent 60%);
+  pointer-events: none;
+}
+
+.floating-card {
+  position: absolute;
+  z-index: 2;
+  top: 28px;
+  left: 25px;
+  padding: 15px 18px;
+  border-radius: 15px;
+  background: #ffffffed;
+  box-shadow: var(--shadow);
+  animation: floatCard 6s ease-in-out infinite;
+}
+
+.floating-card strong { display: block; font-size: 14px; }
+.floating-card small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+
+.hero-caption {
+  position: absolute;
+  z-index: 2;
+  bottom: 30px;
+  left: 28px;
+  right: 25px;
+  color: white;
+}
+
+.hero-caption h2 { font: 32px "Playfair Display", serif; }
+.hero-caption p { font-size: 10px; letter-spacing: 2px; margin-top: 8px; }
+
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 25px 0 0;
+}
+
+.highlight {
+  padding: 15px 20px;
+  border-right: 1px solid #d9dfed;
+}
+
+.highlight:first-child { padding-left: 0; }
+.highlight:last-child { border: 0; }
+
+.highlight strong {
+  font: 27px "Playfair Display", serif;
+  color: var(--blue);
+}
+
+.highlight span {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ========== SECTION 4: EVENT CARDS ========== */
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 24px 0;
+}
+
+.filter {
+  padding: 9px 15px;
+  border: 1px solid #d9dfed;
+  border-radius: 30px;
+  background: white;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.filter.active,
+.filter:hover {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: white;
+}
+
+.event-grid { grid-template-columns: repeat(3, 1fr); }
+
+.event-card {
+  background: white;
+  border: 1px solid #e3e8f2;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px #17233b08;
+  transition: transform .35s, box-shadow .35s;
+}
+
+.event-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 22px 45px #17233b18;
+}
+
+.event-image {
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+  background: #dce5f4;
+}
+
+.event-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .7s;
+}
+
+.event-card:hover .event-image img { transform: scale(1.09); }
+
+.event-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #101b35a0, transparent 65%);
+  pointer-events: none;
+}
+
+.event-tag {
+  position: absolute;
+  z-index: 2;
+  top: 13px;
+  left: 13px;
+  padding: 7px 10px;
+  border-radius: 30px;
+  background: #ffffffed;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.event-info { padding: 20px; }
+
+.event-info h3 {
+  font: 23px "Playfair Display", serif;
+}
+
+.event-info p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 10px 0 17px;
+}
+
+.event-foot {
+  border-top: 1px solid #edf0f6;
+  padding-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.event-foot strong { color: var(--blue); font-size: 12px; }
+
+.event-foot button {
+  background: #edf1ff;
+  color: var(--blue);
+  border: 0;
+  border-radius: 30px;
+  padding: 10px 13px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* ========== SECTION 5: BOOKING FORM ========== */
+
+.planner {
+  display: grid;
+  grid-template-columns: .85fr 1.15fr;
+  gap: 32px;
+  padding: clamp(25px, 4vw, 45px);
+  border-radius: 26px;
+  color: white;
+  background:
+    radial-gradient(circle at 95% 5%, #5878c5 0, transparent 32%),
+    linear-gradient(135deg, #17233b, #253f78);
+  box-shadow: 0 25px 70px #17233b24;
+}
+
+.planner .kicker { color: var(--gold); }
+
+.planner h2 {
+  font: 500 clamp(34px, 4vw, 48px)/1.15 "Playfair Display", serif;
+  margin: 15px 0;
+}
+
+.planner-copy p {
+  color: #d0d9f0;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.planner-note {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #ffffff2c;
+  border-radius: 14px;
+  color: #e4e9f8;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.planner-form {
+  padding: 24px;
+  background: #ffffff0d;
+  border: 1px solid #ffffff25;
+  border-radius: 19px;
+}
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+.full { grid-column: 1 / -1; }
+
+.planner-form label { color: #f2f4fc; }
+
+.planner-form input,
+.planner-form select,
+.planner-form textarea {
+  border-color: #ffffff3a;
+}
+
+.estimate-result {
+  display: none;
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #f4c96b70;
+  background: #f4c96b14;
+  color: #fff2c9;
+  font-size: 11px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
+/* ========== SECTION 6: ABOUT AND FEATURES ========== */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 45px;
+  align-items: center;
+}
+
+.about-image {
+  position: relative;
+  min-height: 390px;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.about-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-image-label {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  padding: 18px;
+  color: white;
+  background: #17233bc9;
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+}
+
+.about-image-label strong {
+  display: block;
+  font: 23px "Playfair Display", serif;
+}
+
+.about-image-label span { font-size: 10px; }
+
+.about-copy p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 2;
+  margin: 13px 0;
+}
+
+.feature-grid {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 30px;
+}
+
+.feature {
+  padding: 25px;
+  background: white;
+  border: 1px solid #e3e8f2;
+  border-radius: 18px;
+  transition: .3s;
+}
+
+.feature:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow);
+}
+
+.feature-icon {
+  width: 47px;
+  height: 47px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #e9eeff;
+  color: var(--blue);
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.feature h3 { font: 21px "Playfair Display", serif; }
+
+.feature p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.9;
+  margin-top: 9px;
+}
+
+/* ========== SECTION 7: REVIEWS ========== */
+
+.review-grid {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 28px;
+}
+
+.review-card {
+  background: white;
+  border: 1px solid #e3e8f2;
+  border-radius: 18px;
+  padding: 23px;
+  transition: .3s;
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow);
+}
+
+.review-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.review-avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e9eeff;
+  color: var(--blue);
+  font-weight: 800;
+}
+
+.review-person strong { display: block; font-size: 12px; }
+.review-person span { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+
+.stars { color: #e3a329; letter-spacing: 2px; }
+
+.review-card p {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.review-form {
+  margin-top: 28px;
+  padding: 25px;
+  background: white;
+  border: 1px solid #e3e8f2;
+  border-radius: 20px;
+}
+
+.review-form h3 { font: 28px "Playfair Display", serif; margin-bottom: 18px; }
+
+/* ========== SECTION 8: CONTACT ========== */
+
+.contact-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  background: white;
+  border-radius: 25px;
+  box-shadow: var(--shadow);
+}
+
+.contact-copy { padding: clamp(25px, 4vw, 45px); }
+
+.contact-copy > p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.9;
+  margin-top: 12px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 22px;
+  font-size: 12px;
+}
+
+.contact-icon {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 13px;
+  background: #e9eeff;
+  color: var(--blue);
+  font-size: 19px;
+}
+
+.contact-item small {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.contact-item strong { overflow-wrap: anywhere; }
+
+.contact-cta {
+  padding: clamp(25px, 4vw, 45px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  background:
+    radial-gradient(circle at 90% 10%, #5679c8, transparent 38%),
+    linear-gradient(145deg, #17233b, #243e77);
+}
+
+.contact-cta .kicker { color: var(--gold); }
+.contact-cta h3 { font: 36px "Playfair Display", serif; margin-top: 13px; }
+.contact-cta p { color: #d3dcf2; font-size: 12px; line-height: 1.9; margin: 14px 0 24px; }
+
+.socials { display: flex; gap: 10px; margin-top: 25px; }
+
+.socials a {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #ffffff55;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  transition: .2s;
+}
+
+.socials a:hover { background: white; color: var(--blue); }
+
+/* ========== SECTION 9: MANAGER PORTAL ========== */
+
+.manager-shell {
+  padding: clamp(22px, 4vw, 42px);
+  border: 1px solid #dce4f5;
+  border-radius: 25px;
+  background: linear-gradient(135deg, #e8edfc, #fff0f4);
+}
+
+.manager-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.login-card {
+  max-width: 470px;
+  margin: auto;
+  padding: 30px;
+  background: white;
+  border: 1px solid #e0e5f2;
+  border-radius: 22px;
+  box-shadow: 0 20px 60px #17233b18;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card::before {
+  content: "";
+  position: absolute;
+  top: -90px;
+  right: -70px;
+  width: 200px;
+  height: 200px;
+  background: #e9eeff;
+  border-radius: 50%;
+}
+
+.login-card > * { position: relative; }
+
+.login-emblem {
+  width: 51px;
+  height: 51px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  background: linear-gradient(135deg, var(--blue), var(--navy));
+  border-radius: 16px;
+  font-size: 23px;
+  animation: glow 3s infinite;
+}
+
+.login-card h3 { font: 32px "Playfair Display", serif; margin: 20px 0 8px; }
+
+.login-card > p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+  margin-bottom: 22px;
+}
+
+.password-wrap { display: flex; gap: 8px; }
+.password-wrap input { flex: 1; min-width: 0; }
+
+.password-wrap button {
+  padding: 0 13px;
+  border: 0;
+  border-radius: 10px;
+  background: #e9eeff;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.login-error { color: #bd304f; font-size: 11px; margin: 12px 0; min-height: 15px; }
+
+.security-note {
+  margin-top: 17px !important;
+  padding: 12px;
+  background: #fff3f5;
+  color: #865465 !important;
+  border-radius: 10px;
+  font-size: 10px !important;
+}
+
+.dashboard { display: none; }
+
+.stats {
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 22px;
+}
+
+.stat {
+  padding: 19px;
+  background: white;
+  border: 1px solid #e0e5f2;
+  border-radius: 15px;
+}
+
+.stat span { display: block; color: var(--muted); font-size: 10px; }
+.stat strong { display: block; margin-top: 8px; color: var(--blue); font: 27px "Playfair Display", serif; }
+
+.dash-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 17px;
+}
+
+.dash-tools input { flex: 1; min-width: 170px; }
+
+.booking-list { display: grid; gap: 13px; }
+
+.booking-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 15px;
+  padding: 18px;
+  background: white;
+  border: 1px solid #e0e5f2;
+  border-radius: 15px;
+}
+
+.booking-card h3 { font: 20px "Playfair Display", serif; }
+
+.booking-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.status {
+  display: inline-block;
+  padding: 6px 10px;
+  margin-top: 10px;
+  border-radius: 30px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status.pending { color: #8b5c15; background: #fff0d2; }
+.status.approved { color: #21673a; background: #def4e5; }
+.status.rejected { color: #a12d4b; background: #ffe1e8; }
+
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.booking-actions button {
+  padding: 8px 10px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.booking-actions .approve { background: var(--blue); color: white; border-color: var(--blue); }
+.booking-actions .reject { color: #a12d4b; }
+
+.empty {
+  padding: 25px;
+  background: white;
+  border-radius: 12px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 12px;
+}
+
+.manager-warning {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.8;
+}
+
+/* ========== SECTION 10: FOOTER AND TOAST ========== */
+
+footer {
+  margin-top: 35px;
+  padding: 28px 0;
+  background: var(--navy);
+  color: white;
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+footer p { color: #d0d8ec; font-size: 10px; }
+
+.toast {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  bottom: 22px;
+  right: 22px;
+  max-width: 350px;
+  padding: 15px 20px;
+  border-radius: 13px;
+  background: var(--navy);
+  color: white;
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.toast.show { display: block; animation: pageEnter .3s; }
+
+@media (max-width: 900px) {
+  .nav-links { gap: 12px; font-size: 10px; }
+  .hero-shell { grid-template-columns: 1fr; }
+  .hero-visual { min-height: 400px; }
+  .event-grid { grid-template-columns: repeat(2, 1fr); }
+  .planner { grid-template-columns: 1fr; }
+  .about-grid { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .booking-card { grid-template-columns: 1fr; }
+  .booking-actions { justify-content: flex-start; }
+}
+
+@media (max-width: 620px) {
+  .nav-inner { min-height: 68px; flex-wrap: wrap; padding: 12px 0; }
+  .nav-links { display: none; width: 100%; flex-wrap: wrap; padding: 10px 0; }
+  .nav-links.open { display: flex; }
+  .menu-toggle { display: inline-flex; }
+  .nav-inner > .btn { padding: 10px 13px; font-size: 10px; }
+  .hero { padding-top: 15px; }
+  .hero-shell { border-radius: 20px; }
+  .hero-copy { padding: 35px 24px; }
+  .hero-copy h1 { font-size: 45px; }
+  .hero-visual { min-height: 340px; }
+  .highlights { grid-template-columns: 1fr 1fr; }
+  .highlight { padding: 14px 8px; border-bottom: 1px solid #d9dfed; }
+  .highlight:first-child { padding-left: 8px; }
+  .highlight:nth-child(2) { border-right: 0; }
+  .highlight:nth-child(3), .highlight:nth-child(4) { border-bottom: 0; }
+  .section { padding: 45px 0; }
+  .section-title-row { align-items: flex-start; flex-direction: column; }
+  .event-grid, .feature-grid, .review-grid { grid-template-columns: 1fr; }
+  .event-image { height: 235px; }
+  .planner { padding: 22px 16px; }
+  .planner-form { padding: 16px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .full { grid-column: auto; }
+  .contact-box { grid-template-columns: 1fr; }
+  .login-card { padding: 22px; }
+  .manager-shell { padding: 20px 14px; }
+  .stat { padding: 13px; }
+  .stat strong { font-size: 22px; }
+  .footer-inner { align-items: flex-start; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ========== SECTION 11: NAVIGATION BAR ========== -->
+
+<header class="navbar">
+  <div class="nav-inner">
+    <a href="#home" class="logo" data-page="home">
+      <span class="logo-mark">✦</span>
+      <span>Event<span>Flow</span></span>
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="#home" data-page="home">Home</a>
+      <a href="#experiences" data-page="experiences">Events</a>
+      <a href="#about" data-page="about">About</a>
+      <a href="#reviews" data-page="reviews">Reviews</a>
+      <a href="#contact" data-page="contact">Contact</a>
+      <a href="#manager" data-page="manager">Manager</a>
+    </nav>
+
+    <button class="btn btn-outline menu-toggle" id="menuToggle" type="button">☰ Menu</button>
+    <a class="btn btn-blue" href="#planner" data-page="planner">Book an Event ↗</a>
+  </div>
+</header>
+
+<main>
+
+<!-- ========== SECTION 12: HOME PAGE ========== -->
+
+<section class="screen hero container" id="home">
+  <div class="hero-shell">
+    <div class="hero-copy">
+      <div class="kicker">Event management, made elegant</div>
+      <h1>Plan beautifully.<br><span>Celebrate brilliantly.</span></h1>
+      <p>Beautiful celebrations begin with a little imagination. Find your style, shape your budget, and bring every detail together in one creative space.</p>
+
+      <div class="hero-buttons">
+        <a class="btn btn-blue" href="#experiences" data-page="experiences">Explore Events ↗</a>
+        <a class="btn btn-outline" href="#planner" data-page="planner">Build Your Plan</a>
+      </div>
+
+      <div class="hero-note">✦ For the little moments and the once-in-a-lifetime ones.</div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-photo"></div>
+      <div class="floating-card">
+        <strong>✦ Made for your moment</strong>
+        <small>Thoughtful plans. Beautiful memories.</small>
+      </div>
+      <div class="hero-caption">
+        <h2>Your day. Your story.</h2>
+        <p>LET'S CREATE SOMETHING MEMORABLE</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlights">
+    <div class="highlight"><strong>01.</strong><span>Creative concepts</span></div>
+    <div class="highlight"><strong>02.</strong><span>Budget planning</span></div>
+    <div class="highlight"><strong>03.</strong><span>Personalised events</span></div>
+    <div class="highlight"><strong>04.</strong><span>Manager support</span></div>
+  </div>
+</section>
+
+<!-- ========== SECTION 13: EVENTS GALLERY ========== -->
+
+<section class="screen section container page-hidden" id="experiences">
+  <div class="section-title-row">
+    <div>
+      <div class="kicker">Find your kind of celebration</div>
+      <h2 class="heading">What are we gathering for?</h2>
+      <p class="intro">Choose an event style and start planning a celebration that fits your occasion, guests, and budget.</p>
+    </div>
+    <a class="btn btn-outline" href="#planner" data-page="planner">Create Custom Event ↗</a>
+  </div>
+
+  <div class="filters">
+    <button class="filter active" data-filter="all">All Events</button>
+    <button class="filter" data-filter="wedding">Weddings</button>
+    <button class="filter" data-filter="birthday">Birthdays</button>
+    <button class="filter" data-filter="college">College</button>
+    <button class="filter" data-filter="corporate">Corporate</button>
+    <button class="filter" data-filter="party">Parties</button>
+    <button class="filter" data-filter="concert">Live Shows</button>
+  </div>
+
+  <div class="grid event-grid">
+
+    <article class="event-card" data-category="wedding">
+      <div class="event-image">
+        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=85" alt="Elegant wedding celebration" loading="lazy">
+        <span class="event-tag">MADE WITH LOVE</span>
+      </div>
+      <div class="event-info">
+        <h3>The Wedding Story</h3>
+        <p>Floral details, romantic lighting, elegant décor, and a celebration designed around you.</p>
+        <div class="event-foot"><strong>From ₹1,50,000</strong><button data-event="wedding">Plan This ↗</button></div>
+      </div>
+    </article>
+
+    <article class="event-card" data-category="birthday">
+      <div class="event-image">
+        <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=900&q=85" alt="Birthday party decorations" loading="lazy">
+        <span class="event-tag">YOUR SPECIAL DAY</span>
+      </div>
+      <div class="event-info">
+        <h3>Birthday Celebrations</h3>
+        <p>Colourful themes, beautiful cakes, personalised decorations, and joyful memories.</p>
+        <div class="event-foot"><strong>From ₹8,000</strong><button data-event="birthday">Plan This ↗</button></div>
+      </div>
+    </article>
+
+    <article class="event-card" data-category="college">
+      <div class="event-image">
+        <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=85" alt="Live college event" loading="lazy">
+        <span class="event-tag">CAMPUS ENERGY</span>
+      </div>
+      <div class="event-info">
+        <h3>College Fests</h3>
+        <p>Stage arrangements, sound systems, performances, competitions, and student celebrations.</p>
+        <div class="event-foot"><strong>From ₹25,000</strong><button data-event="college">Plan This ↗</button></div>
+      </div>
+    </article>
+
+    <article class="event-card" data-category="corporate">
+      <div class="event-image">
+        <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=900&q=85" alt="Corporate event setup" loading="lazy">
+        <span class="event-tag">PROFESSIONALLY PLANNED</span>
+      </div>
+      <div class="event-info">
+        <h3>Corporate Gatherings</h3>
+        <p>Company celebrations, product launches, meetings, and professional events.</p>
+        <div class="event-foot"><strong>From ₹40,000</strong><button data-event="corporate">Plan This ↗</button></div>
+      </div>
+    </article>
+
+    <article class="event-card" data-category="party">
+      <div class="event-image">
+        <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=85" alt="Party with colourful lights" loading="lazy">
+        <span class="event-tag">LET'S CELEBRATE</span>
+      </div>
+      <div class="event-info">
+        <h3>Private Parties</h3>
+        <p>Music, lighting, décor, and a personalised atmosphere for your special occasion.</p>
+        <div class="event-foot"><strong>From ₹15,000</strong><button data-event="party">Plan This ↗</button></div>
+      </div>
+    </article>
+
+    <article class="event-card" data-category="concert">
+      <div class="event-image">
+        <img src="https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=900&q=85" alt="Concert audience and stage lights" loading="lazy">
+        <span class="event-tag">LIVE THE MOMENT</span>
+      </div>
+      <div class="event-info">
+        <h3>Concerts & Live Shows</h3>
+        <p>Stage design, audio equipment, lighting, crowd coordination, and live entertainment.</p>
+        <div class="event-foot"><strong>From ₹50,000</strong><button data-event="concert">Plan This ↗</button></div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ========== SECTION 14: BOOKING FORM ========== -->
+
+<section class="screen section container page-hidden" id="planner">
+  <div class="planner">
+    <div class="planner-copy">
+      <div class="kicker">Your first draft starts here</div>
+      <h2>Make room for a little magic.</h2>
+      <p>Tell us the basics. Get an illustrative estimate and submit your booking request for the manager to review.</p>
+      <div class="planner-note">
+        ✦ Your estimated cost is a starting point, not a supplier quotation. The manager can change item costs, update the plan, and check whether the final estimate fits your budget.
+      </div>
+    </div>
+
+    <form class="planner-form" id="bookingForm">
+      <div class="form-grid">
+
+        <div class="field full">
+          <label for="bookingTitle">Event name</label>
+          <input id="bookingTitle" required maxlength="70" placeholder="Example: Annual College Day">
+        </div>
+
+        <div class="field">
+          <label for="bookingType">Event type</label>
+          <select id="bookingType">
+            <option value="birthday">Birthday</option>
+            <option value="wedding">Wedding</option>
+            <option value="college">College event</option>
+            <option value="corporate">Corporate</option>
+            <option value="party">Party</option>
+            <option value="concert">Live show</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="guestCount">Expected guests</label>
+          <input id="guestCount" type="number" min="1" max="10000" value="100" required>
+        </div>
+
+        <div class="field">
+          <label for="customerName">Your name</label>
+          <input id="customerName" required maxlength="70" placeholder="Full name">
+        </div>
+
+        <div class="field">
+          <label for="customerContact">Phone / email</label>
+          <input id="customerContact" required maxlength="120" placeholder="Contact details">
+        </div>
+
+        <div class="field">
+          <label for="eventDate">Preferred date</label>
+          <input id="eventDate" type="date" required>
+        </div>
+
+        <div class="field">
+          <label for="eventTime">Preferred time</label>
+          <select id="eventTime">
+            <option>09:00 AM</option><option>10:00 AM</option>
+            <option>11:00 AM</option><option>12:00 PM</option>
+            <option>01:00 PM</option><option>02:00 PM</option>
+            <option>03:00 PM</option><option>04:00 PM</option>
+            <option>05:00 PM</option><option>06:00 PM</option>
+            <option>07:00 PM</option><option>08:00 PM</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="eventBudget">Your budget (₹)</label>
+          <input id="eventBudget" type="number" min="1000" value="50000" required>
+        </div>
+
+        <div class="field full">
+          <label for="eventNotes">Special requests</label>
+          <textarea id="eventNotes" rows="3" maxlength="500" placeholder="Venue, theme, food, seating, decorations, etc."></textarea>
+        </div>
+
+      </div>
+
+      <button class="btn btn-gold form-submit" type="submit" style="width:100%">Submit Booking Request ↗</button>
+      <div class="estimate-result" id="bookingResult" role="status"></div>
+    </form>
+  </div>
+</section>
+
+<!-- ========== SECTION 15: ABOUT ========== -->
+
+<section class="screen section container page-hidden" id="about">
+  <div class="about-grid">
+    <div class="about-image">
+      <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=85" alt="Beautiful event venue" loading="lazy">
+      <div class="about-image-label">
+        <strong>Made for your moments.</strong>
+        <span>From the first idea to the final toast ✦</span>
+      </div>
+    </div>
+
+    <div class="about-copy">
+      <div class="kicker">A little about us</div>
+      <h2 class="heading">Good events feel effortless.</h2>
+      <p>EventFlow is an Event Management System designed to make planning easier. Explore event inspiration, submit your requirements, choose a budget, and let the manager review your plan.</p>
+      <p>Our aim is to keep event details, customer requirements, and estimated costs organised in one place.</p>
+      <a class="btn btn-blue" href="#planner" data-page="planner">Start Planning ↗</a>
+    </div>
+  </div>
+
+  <div class="grid feature-grid">
+    <article class="feature">
+      <div class="feature-icon">✦</div>
+      <h3>Creative Planning</h3>
+      <p>Explore event styles and personalise the plan to match your celebration.</p>
+    </article>
+    <article class="feature">
+      <div class="feature-icon">₹</div>
+      <h3>Budget Clarity</h3>
+      <p>Compare your budget with the manager's updated estimated costs.</p>
+    </article>
+    <article class="feature">
+      <div class="feature-icon">✓</div>
+      <h3>Organised Requests</h3>
+      <p>Review bookings, customer details, event requirements, and approvals.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ========== SECTION 16: REVIEWS ========== -->
+
+<section class="screen section container page-hidden" id="reviews">
+  <div class="kicker">Kind words, shared moments</div>
+  <h2 class="heading">Reviews from our community.</h2>
+  <p class="intro">These sample reviews demonstrate the feedback feature. New reviews are saved in this browser.</p>
+
+  <div class="grid review-grid" id="reviewGrid"></div>
+
+  <form class="review-form" id="reviewForm">
+    <h3>Share your experience</h3>
+
+    <div class="form-grid" style="margin-top:20px">
+      <div class="field">
+        <label for="reviewName">Your name</label>
+        <input id="reviewName" required maxlength="50" placeholder="Your name">
+      </div>
+
+      <div class="field">
+        <label for="reviewEvent">Event type</label>
+        <select id="reviewEvent">
+          <option>Wedding</option><option>Birthday</option>
+          <option>College event</option><option>Corporate</option>
+          <option>Party</option><option>Live show</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <label for="reviewRating">Your rating</label>
+        <select id="reviewRating">
+          <option value="5">★★★★★ — Excellent</option>
+          <option value="4">★★★★☆ — Very good</option>
+          <option value="3">★★★☆☆ — Good</option>
+          <option value="2">★★☆☆☆ — Needs improvement</option>
+          <option value="1">★☆☆☆☆ — Poor</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <label for="reviewText">Your review</label>
+        <textarea id="reviewText" rows="3" maxlength="500" required placeholder="Tell us about your experience..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-blue" type="submit">Submit Review ↗</button>
+  </form>
+</section>
+
+<!-- ========== SECTION 17: CONTACT INFORMATION ========== -->
+
+<section class="screen section container page-hidden" id="contact">
+  <div class="kicker">Let's make it happen</div>
+  <h2 class="heading">Your next favourite memory starts here.</h2>
+
+  <div class="contact-box">
+    <div class="contact-copy">
+      <h3 class="serif" style="font-size:28px">Get in touch.</h3>
+      <p>Have a question, a big idea, or a date in mind? Contact us using the details below.</p>
+
+      <!-- Replace these sample contact details with your real information. -->
+
+      <div class="contact-item">
+        <span class="contact-icon">✉</span>
+        <div>
+          <small>EMAIL US</small>
+          <strong><a href="mailto:hello@eventflow.in">hello@eventflow.in</a></strong>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <span class="contact-icon">☎</span>
+        <div>
+          <small>CALL / WHATSAPP</small>
+          <strong><a href="tel:+919876543210">+91 98765 43210</a></strong>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <span class="contact-icon">⌖</span>
+        <div>
+          <small>OUR LOCATION</small>
+          <strong>Add your city and address</strong>
+        </div>
+      </div>
+
+      <p style="font-size:10px">These are sample contact details. Replace them before publishing your website.</p>
+    </div>
+
+    <div class="contact-cta">
+      <div class="kicker">Your next celebration</div>
+      <h3>Let's talk details.</h3>
+      <p>Tell us your event idea, preferred date, guest count, and budget. Start with a booking request today.</p>
+      <a href="#planner" data-page="planner" class="btn btn-gold" style="align-self:flex-start">Start a Booking ↗</a>
+
+      <div class="socials">
+        <a href="https://instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">IG</a>
+        <a href="https://facebook.com/" target="_blank" rel="noreferrer" aria-label="Facebook">FB</a>
+        <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" aria-label="WhatsApp">WA</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SECTION 18: MANAGER LOGIN AND DASHBOARD ========== -->
+
+<section class="screen section container page-hidden" id="manager">
+  <div class="manager-shell">
+    <div class="manager-head">
+      <div>
+        <div class="kicker">Restricted workspace</div>
+        <h2 class="heading">Manager Portal.</h2>
+        <p class="intro">Review booking requests, update costs, and manage event details.</p>
+      </div>
+      <span class="btn btn-outline">MANAGER ACCESS</span>
+    </div>
+
+    <form class="login-card" id="loginForm">
+      <div class="login-emblem">✦</div>
+      <h3>Welcome back.</h3>
+      <p>Sign in to review requests, manage estimates, and update event plans.</p>
+
+      <div class="field">
+        <label for="managerUsername">Manager username</label>
+        <input id="managerUsername" autocomplete="username" required placeholder="Enter manager username">
+      </div>
+
+      <div class="field">
+        <label for="managerPassword">Password</label>
+        <div class="password-wrap">
+          <input id="managerPassword" type="password" autocomplete="current-password" required placeholder="Enter manager password">
+          <button type="button" id="togglePassword">Show</button>
+        </div>
+      </div>
+
+      <div class="login-error" id="loginError" role="alert"></div>
+      <button class="btn btn-blue" type="submit" style="width:100%">Secure Sign In ↗</button>
+
+      <p class="security-note">
+        Demo login: username <strong>manager</strong>, password <strong>Event@2026</strong>.
+        This frontend-only login is a demonstration, not real security. A production website needs server-side authentication.
+      </p>
+    </form>
+
+    <div class="dashboard" id="dashboard">
+      <div class="grid stats">
+        <div class="stat"><span>Total requests</span><strong id="statTotal">0</strong></div>
+        <div class="stat"><span>Pending</span><strong id="statPending">0</strong></div>
+        <div class="stat"><span>Approved</span><strong id="statApproved">0</strong></div>
+        <div class="stat"><span>Approved estimates</span><strong id="statValue">₹0</strong></div>
+      </div>
+
+      <div class="dash-tools">
+        <input id="searchBookings" placeholder="Search customer or event...">
+        <select id="statusFilter">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button class="btn btn-outline" type="button" id="addDemoBooking">+ Sample Request</button>
+        <button class="btn btn-outline" type="button" id="logoutButton">Lock Dashboard</button>
+      </div>
+
+      <div class="booking-list" id="bookingList"></div>
+
+      <p class="manager-warning">
+        Bookings are stored in this browser. For real bookings from multiple customers and devices, connect a backend and database.
+      </p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ========== SECTION 19: FOOTER ========== -->
+
+<footer>
+  <div class="container footer-inner">
+    <a href="#home" data-page="home" class="logo" style="color:white">
+      <span class="logo-mark">✦</span>
+      <span style="color:white">EventFlow</span>
+    </a>
+    <p>Event Management System · Plan beautifully. Celebrate brilliantly.</p>
+    <a href="#contact" data-page="contact">Contact Us ↗</a>
+    <a href="#home" data-page="home">Back to Top ↑</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<!-- ========== SECTION 20: JAVASCRIPT ========== -->
+
+<script>
+// ===== 20A: PAGE NAVIGATION AND ANIMATIONS =====
+
+const PAGES = ["home", "experiences", "about", "planner", "reviews", "contact", "manager"];
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
+
+const EVENT_NAMES = {
+  wedding: "Wedding",
+  birthday: "Birthday",
+  college: "College event",
+  corporate: "Corporate",
+  party: "Party",
+  concert: "Live show"
+};
+
+const EVENT_ICONS = {
+  wedding: "💐",
+  birthday: "🎂",
+  college: "🎓",
+  corporate: "🥂",
+  party: "🪩",
+  concert: "🎤"
+};
+
+function showPage(page, addHistory = true) {
+  if (!PAGES.includes(page)) page = "home";
+
+  $$(".screen").forEach(screen => {
+    const visible = screen.id === page;
+    screen.classList.toggle("page-hidden", !visible);
+
+    if (visible) {
+      screen.classList.remove("page-enter");
+      void screen.offsetWidth;
+      screen.classList.add("page-enter");
+    }
+  });
+
+  $$(".nav-links a[data-page]").forEach(link => {
+    link.classList.toggle("nav-current", link.dataset.page === page);
+  });
+
+  $("#navLinks").classList.remove("open");
+
+  if (addHistory && location.hash !== "#" + page) {
+    history.pushState({ page }, "", "#" + page);
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.addEventListener("click", event => {
+  const link = event.target.closest('a[href^="#"]');
+  if (!link) return;
+
+  const page = link.dataset.page || link.getAttribute("href").slice(1);
+
+  if (!PAGES.includes(page)) return;
+
+  event.preventDefault();
+  showPage(page);
+});
+
+window.addEventListener("popstate", () => {
+  showPage(location.hash.slice(1) || "home", false);
+});
+
+window.addEventListener("hashchange", () => {
+  showPage(location.hash.slice(1) || "home", false);
+});
+
+$("#menuToggle").addEventListener("click", () => {
+  $("#navLinks").classList.toggle("open");
+});
+
+// ===== 20B: SHARED HELPERS =====
+
+function money(value) {
+  return "₹" + Math.max(0, Math.round(Number(value) || 0)).toLocaleString("en-IN");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[character]);
+}
+
+function showToast(message) {
+  const toast = $("#toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.remove("show"), 3500);
+}
+
+function localToday() {
+  const date = new Date();
+
+  return date.getFullYear() + "-" +
+    String(date.getMonth() + 1).padStart(2, "0") + "-" +
+    String(date.getDate()).padStart(2, "0");
+}
+
+// ===== 20C: SAVE BOOKINGS IN THIS BROWSER =====
+
+function loadBookings() {
+  try {
+    return JSON.parse(localStorage.getItem("eventFlowBookings") || "[]");
+  } catch (error) {
+    return [];
+  }
+}
+
+let bookings = loadBookings();
+
+let nextBookingId = bookings.reduce(
+  (maximum, booking) => Math.max(maximum, Number(booking.id) || 0),
+  0
+) + 1;
+
+function saveBookings() {
+  try {
+    localStorage.setItem("eventFlowBookings", JSON.stringify(bookings));
+  } catch (error) {
+    showToast("Browser storage is unavailable. Changes may not persist.");
+  }
+}
+
+// ===== 20D: EVENT FILTERS =====
+
+$$(".filter").forEach(button => {
+  button.addEventListener("click", () => {
+    $$(".filter").forEach(item => item.classList.remove("active"));
+    button.classList.add("active");
+
+    $$(".event-card").forEach(card => {
+      card.style.display =
+        button.dataset.filter === "all" ||
+        card.dataset.category === button.dataset.filter
+          ? ""
+          : "none";
+    });
+  });
+});
+
+// ===== 20E: SELECT AN EVENT =====
+
+$$("[data-event]").forEach(button => {
+  button.addEventListener("click", () => {
+    const type = button.dataset.event;
+
+    $("#bookingType").value = type;
+    $("#bookingTitle").value = (EVENT_NAMES[type] || "Event") + " event";
+
+    showPage("planner");
+    showToast(EVENT_NAMES[type] + " selected. Complete your booking form.");
+  });
+});
+
+// ===== 20F: BOOKING FORM AND ESTIMATED BUDGET =====
+
+const eventDateInput = $("#eventDate");
+eventDateInput.min = localToday();
+
+$("#bookingForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const title = $("#bookingTitle").value.trim();
+  const name = $("#customerName").value.trim();
+  const contact = $("#customerContact").value.trim();
+  const date = $("#eventDate").value;
+  const guests = Number($("#guestCount").value);
+  const budget = Number($("#eventBudget").value);
+
+  if (!title || !name || !contact || !date) {
+    showToast("Please complete all required fields.");
+    return;
+  }
+
+  if (date < localToday()) {
+    showToast("Please choose today or a future date.");
+    return;
+  }
+
+  if (!Number.isFinite(guests) || guests < 1 ||
+      !Number.isFinite(budget) || budget < 1000) {
+    showToast("Please enter a valid guest count and budget.");
+    return;
+  }
+
+  const estimate = Math.round(budget * 0.90);
+
+  const booking = {
+    id: nextBookingId++,
+    title,
+    type: $("#bookingType").value,
+    name,
+    contact,
+    date,
+    time: $("#eventTime").value,
+    guests,
+    budget,
+    cost: estimate,
+    status: "pending",
+    notes: $("#eventNotes").value.trim(),
+    createdAt: new Date().toISOString()
+  };
+
+  bookings.unshift(booking);
+  saveBookings();
+  renderBookings();
+
+  const breakdown = [
+    ["Venue", .30],
+    ["Food", .35],
+    ["Decor", .15],
+    ["Photography", .10],
+    ["Entertainment", .10]
+  ];
+
+  const breakdownHTML = breakdown.map(([label, portion]) =>
+    `<div>${label}: <strong>${money(estimate * portion)}</strong></div>`
+  ).join("");
+
+  const result = $("#bookingResult");
+  result.style.display = "block";
+  result.innerHTML = `
+    ✓ Your request for <strong>${escapeHTML(title)}</strong> has been saved.
+    <br>Illustrative starting estimate: <strong>${money(estimate)}</strong>.
+    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:5px">
+      ${breakdownHTML}
+    </div>
+    <p style="margin-top:10px">
+      Your request is available in the manager portal in this browser.
+      This demo does not send a real email or SMS.
+    </p>
+  `;
+
+  $("#bookingForm").reset();
+  eventDateInput.min = localToday();
+  $("#guestCount").value = 100;
+  $("#eventBudget").value = 50000;
+
+  showToast("Booking request saved successfully.");
+});
+
+// ===== 20G: REVIEWS =====
+
+const SAMPLE_REVIEWS = [
+  {
+    name: "Ananya R.",
+    event: "Wedding",
+    rating: 5,
+    text: "The décor and lighting looked beautiful. Planning the details felt much easier."
+  },
+  {
+    name: "Kiran M.",
+    event: "College event",
+    rating: 5,
+    text: "The event requirements and planning details were easy to organise."
+  },
+  {
+    name: "Priya S.",
+    event: "Birthday",
+    rating: 4,
+    text: "Loved the theme ideas and the ability to plan around our budget."
+  }
+];
+
+let reviews = [];
+
+try {
+  const savedReviews = localStorage.getItem("eventFlowReviews");
+  reviews = savedReviews ? JSON.parse(savedReviews) : SAMPLE_REVIEWS.slice();
+} catch (error) {
+  reviews = SAMPLE_REVIEWS.slice();
+}
+
+function renderReviews() {
+  const grid = $("#reviewGrid");
+
+  grid.innerHTML = reviews.slice().reverse().map(review => {
+    const rating = Math.max(1, Math.min(5, Number(review.rating) || 5));
+
+    return `
+      <article class="review-card">
+        <div class="review-top">
+          <div class="review-avatar">${escapeHTML((review.name || "G").charAt(0).toUpperCase())}</div>
+          <div class="review-person">
+            <strong>${escapeHTML(review.name)}</strong>
+            <span>${escapeHTML(review.event)} experience</span>
+          </div>
+        </div>
+        <div class="stars">${"★".repeat(rating)}${"☆".repeat(5 - rating)}</div>
+        <p>${escapeHTML(review.text)}</p>
+      </article>
+    `;
+  }).join("");
+}
+
+$("#reviewForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const review = {
+    name: $("#reviewName").value.trim(),
+    event: $("#reviewEvent").value,
+    rating: Number($("#reviewRating").value),
+    text: $("#reviewText").value.trim()
+  };
+
+  if (!review.name || !review.text) return;
+
+  reviews.push(review);
+
+  try {
+    localStorage.setItem("eventFlowReviews", JSON.stringify(reviews));
+  } catch (error) {}
+
+  renderReviews();
+  $("#reviewForm").reset();
+  showToast("Thank you for sharing your review!");
+});
+
+// ===== 20H: MANAGER LOGIN SECURITY DEMO =====
+
+// Important: credentials in frontend JavaScript are visible to users.
+// Use server-side authentication for a real production website.
+
+const MANAGER_USERNAME = "manager";
+const MANAGER_PASSWORD = "Event@2026";
+
+let failedLoginAttempts = 0;
+let lockedUntil = 0;
+let managerLoggedIn = false;
+
+$("#togglePassword").addEventListener("click", () => {
+  const password = $("#managerPassword");
+  const visible = password.type === "password";
+
+  password.type = visible ? "text" : "password";
+  $("#togglePassword").textContent = visible ? "Hide" : "Show";
+});
+
+$("#loginForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const error = $("#loginError");
+
+  if (Date.now() < lockedUntil) {
+    error.textContent = "Login temporarily paused. Please wait 30 seconds.";
+    return;
+  }
+
+  const username = $("#managerUsername").value.trim();
+  const password = $("#managerPassword").value;
+
+  if (username === MANAGER_USERNAME && password === MANAGER_PASSWORD) {
+    failedLoginAttempts = 0;
+    managerLoggedIn = true;
+
+    error.textContent = "";
+    $("#loginForm").style.display = "none";
+    $("#dashboard").style.display = "block";
+
+    renderBookings();
+    showToast("Manager dashboard unlocked.");
+  } else {
+    failedLoginAttempts++;
+    $("#managerPassword").value = "";
+    error.textContent = "Incorrect username or password.";
+
+    if (failedLoginAttempts >= 5) {
+      failedLoginAttempts = 0;
+      lockedUntil = Date.now() + 30000;
+      error.textContent = "Too many attempts. Login paused for 30 seconds.";
+    }
+  }
+});
+
+$("#logoutButton").addEventListener("click", () => {
+  managerLoggedIn = false;
+
+  $("#dashboard").style.display = "none";
+  $("#loginForm").style.display = "block";
+  $("#managerPassword").value = "";
+  $("#loginError").textContent = "";
+
+  showToast("Manager dashboard locked.");
+});
+
+// ===== 20I: MANAGER DASHBOARD =====
+
+function renderBookings() {
+  const query = $("#searchBookings").value.toLowerCase().trim();
+  const filter = $("#statusFilter").value;
+
+  const filtered = bookings.filter(booking => {
+    const statusMatches = filter === "all" || booking.status === filter;
+    const searchable = [
+      booking.title, booking.name, booking.contact, booking.type
+    ].join(" ").toLowerCase();
+
+    return statusMatches && searchable.includes(query);
+  });
+
+  $("#statTotal").textContent = bookings.length;
+  $("#statPending").textContent =
+    bookings.filter(booking => booking.status === "pending").length;
+  $("#statApproved").textContent =
+    bookings.filter(booking => booking.status === "approved").length;
+
+  $("#statValue").textContent = money(
+    bookings
+      .filter(booking => booking.status === "approved")
+      .reduce((sum, booking) => sum + Number(booking.cost || 0), 0)
+  );
+
+  if (!filtered.length) {
+    $("#bookingList").innerHTML =
+      '<div class="empty">No bookings found. Customer requests will appear here when submitted in this browser.</div>';
+    return;
+  }
+
+  $("#bookingList").innerHTML = filtered.map(booking => `
+    <article class="booking-card">
+      <div>
+        <h3>${escapeHTML(booking.title)}</h3>
+
+        <div class="booking-meta">
+          <span>Customer: ${escapeHTML(booking.name)}</span>
+          <span>Contact: ${escapeHTML(booking.contact)}</span>
+          <span>Date: ${escapeHTML(booking.date)}</span>
+          <span>Time: ${escapeHTML(booking.time || "Not specified")}</span>
+          <span>Event: ${escapeHTML(EVENT_NAMES[booking.type] || booking.type)}</span>
+          <span>Guests: ${Number(booking.guests) || 0}</span>
+        </div>
+
+        <div class="booking-meta">
+          <span>Budget: <strong>${money(booking.budget)}</strong></span>
+          <span>Estimate: <strong>${money(booking.cost)}</strong></span>
+          ${Number(booking.cost) > Number(booking.budget)
+            ? `<span style="color:#a12d4b"><strong>Over budget by ${money(booking.cost - booking.budget)}</strong></span>`
+            : ""}
+        </div>
+
+        <span class="status ${escapeHTML(booking.status)}">${escapeHTML(booking.status)}</span>
+
+        ${booking.notes
+          ? `<div class="booking-meta">Notes: ${escapeHTML(booking.notes)}</div>`
+          : ""}
+      </div>
+
+      <div class="booking-actions">
+        <button data-action="edit" data-id="${Number(booking.id)}">Edit / Costs</button>
+
+        ${booking.status !== "approved"
+          ? `<button class="approve" data-action="approve" data-id="${Number(booking.id)}">Approve</button>`
+          : ""}
+
+        ${booking.status !== "rejected"
+          ? `<button class="reject" data-action="reject" data-id="${Number(booking.id)}">Decline</button>`
+          : ""}
+
+        <button data-action="delete" data-id="${Number(booking.id)}">Delete</button>
+      </div>
+    </article>
+  `).join("");
+}
+
+$("#searchBookings").addEventListener("input", renderBookings);
+$("#statusFilter").addEventListener("change", renderBookings);
+
+// Add a test request to preview the manager panel.
+$("#addDemoBooking").addEventListener("click", () => {
+  bookings.unshift({
+    id: nextBookingId++,
+    title: "Sample event request",
+    type: "party",
+    name: "Demo customer",
+    contact: "demo@example.com",
+    date: localToday(),
+    time: "06:00 PM",
+    guests: 80,
+    budget: 40000,
+    cost: 36000,
+    status: "pending",
+    notes: "Sample request — edit or delete this entry."
+  });
+
+  saveBookings();
+  renderBookings();
+  showToast("Sample request added.");
+});
+
+// ===== 20J: APPROVE, DECLINE, EDIT, DELETE =====
+
+$("#bookingList").addEventListener("click", event => {
+  const button = event.target.closest("button[data-action]");
+
+  if (!button || !managerLoggedIn) return;
+
+  const id = Number(button.dataset.id);
+  const booking = bookings.find(item => Number(item.id) === id);
+
+  if (!booking) return;
+
+  const action = button.dataset.action;
+
+  if (action === "approve") {
+    booking.status = "approved";
+    saveBookings();
+    renderBookings();
+    showToast("Booking approved.");
+    return;
+  }
+
+  if (action === "reject") {
+    booking.status = "rejected";
+    saveBookings();
+    renderBookings();
+    showToast("Booking declined.");
+    return;
+  }
+
+  if (action === "delete") {
+    if (confirm("Delete this booking from this browser?")) {
+      bookings = bookings.filter(item => Number(item.id) !== id);
+      saveBookings();
+      renderBookings();
+      showToast("Booking deleted.");
+    }
+    return;
+  }
+
+  if (action === "edit") {
+    const title = prompt("Event name:", booking.title);
+    if (title === null) return;
+
+    const name = prompt("Customer name:", booking.name);
+    if (name === null) return;
+
+    const contact = prompt("Customer phone or email:", booking.contact);
+    if (contact === null) return;
+
+    const date = prompt("Event date (YYYY-MM-DD):", booking.date);
+    if (date === null) return;
+
+    const time = prompt("Event time:", booking.time || "Not specified");
+    if (time === null) return;
+
+    const guests = prompt("Number of guests:", booking.guests);
+    if (guests === null) return;
+
+    const budget = prompt("Customer budget in rupees:", booking.budget);
+    if (budget === null) return;
+
+    const cost = prompt("Manager estimated cost in rupees:", booking.cost);
+    if (cost === null) return;
+
+    const notes = prompt("Manager notes / requirements:", booking.notes || "");
+    if (notes === null) return;
+
+    if (!title.trim() || !name.trim() || !contact.trim()) {
+      showToast("Event name, customer name, and contact are required.");
+      return;
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date.trim()) ||
+        !Number.isFinite(Number(guests)) || Number(guests) < 1 ||
+        !Number.isFinite(Number(budget)) || Number(budget) < 0 ||
+        !Number.isFinite(Number(cost)) || Number(cost) < 0) {
+      showToast("Please enter a valid date, guest count, budget, and cost.");
+      return;
+    }
+
+    booking.title = title.trim();
+    booking.name = name.trim();
+    booking.contact = contact.trim();
+    booking.date = date.trim();
+    booking.time = time.trim();
+    booking.guests = Number(guests);
+    booking.budget = Number(budget);
+    booking.cost = Number(cost);
+    booking.notes = notes.trim();
+
+    saveBookings();
+    renderBookings();
+
+    if (booking.cost > booking.budget) {
+      showToast("Estimate exceeds budget by " + money(booking.cost - booking.budget) + ".");
+    } else {
+      showToast("Booking details and costs updated.");
+    }
+  }
+});
+
+// ===== 20K: INITIALISE WEBSITE =====
+
+renderReviews();
+renderBookings();
+showPage(location.hash.slice(1) || "home", false);
+</script>
+
+</body>
+</html>
