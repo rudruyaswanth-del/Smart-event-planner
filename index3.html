@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Management System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+:root{--ink:#17233b;--paper:#f4f7fc;--cream:#ffffff;--muted:#667085;--green:#3157a4;--lime:#f4c96b;--orange:#ef9b83;--line:#dfe6f1;--dark:#17233b;--shadow:0 22px 60px #243b681c}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink)}button,input,select,textarea{font:inherit}button,a{cursor:pointer}a{text-decoration:none;color:inherit}.serif{font-family:'Playfair Display',serif}.topbar{height:78px;display:flex;align-items:center;justify-content:space-between;padding:0 max(5vw,22px);background:var(--cream);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.7px;font-size:20px}.brand-mark{width:38px;height:38px;background:var(--green);color:var(--lime);border-radius:50%;display:grid;place-items:center;font-size:20px}.brand span:last-child{color:var(--green)}.navlinks{display:flex;gap:28px;color:#62665e;font-size:13px;font-weight:600}.navlinks a:hover,.navlinks a.nav-current{color:var(--green)}.navlinks a.nav-current{position:relative}.navlinks a.nav-current:after{content:'';position:absolute;left:0;right:0;bottom:-10px;height:2px;border-radius:2px;background:var(--lime)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f4c96b;outline-offset:3px}.nav-actions{display:flex;gap:9px;align-items:center}.btn{border:0;border-radius:999px;padding:12px 18px;font-weight:700;font-size:12px;transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn:hover{transform:translateY(-2px)}.btn-dark{background:var(--green);color:white}.btn-lime{background:var(--lime);color:var(--dark)}.btn-outline{border:1px solid #d4d0c5;background:transparent;color:var(--ink)}.btn-small{padding:8px 12px;font-size:11px}.hero{padding:45px max(5vw,22px) 55px;max-width:1500px;margin:auto}.hero-shell{display:grid;grid-template-columns:1.02fr .98fr;min-height:540px;background:#e9e9d9;border-radius:27px;overflow:hidden;position:relative}.hero-copy{padding:65px 7% 50px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;position:relative;z-index:2}.eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--green);font-weight:800;display:flex;align-items:center;gap:9px}.eyebrow:before{content:"";width:23px;height:2px;background:var(--green)}h1{font-size:clamp(45px,5.4vw,76px);line-height:1.02;letter-spacing:-2.7px;font-weight:500;margin:24px 0 21px}.hero-copy h1 em{font-weight:500;color:var(--green)}.hero-copy p{color:#646a60;line-height:1.8;font-size:14px;max-width:420px}.hero-buttons{display:flex;gap:11px;flex-wrap:wrap;margin-top:27px}.hero-note{display:flex;align-items:center;gap:12px;margin-top:32px;color:#666b62;font-size:11px}.tiny-dots{display:flex}.tiny-dots span{height:28px;width:28px;border:2px solid #e9e9d9;border-radius:50%;display:grid;place-items:center;margin-left:-6px;background:#315c48;color:#d8f078;font-size:10px}.hero-visual{position:relative;min-height:480px;background:#bdc8ae;overflow:hidden}.hero-visual .photo{position:absolute;inset:0;background:linear-gradient(0deg,#1d302d99,transparent 48%),linear-gradient(135deg,#b8c8ad,#e9c6a8 55%,#7b967e)}.sun{position:absolute;width:260px;height:260px;border-radius:50%;background:#f6d7a2;top:45px;right:15%;opacity:.9;filter:blur(1px)}.leaf{position:absolute;width:250px;height:400px;background:linear-gradient(120deg,#244a38,#77946b);border-radius:100% 0 100% 0;transform:rotate(30deg);bottom:-150px;left:-70px;opacity:.85}.leaf.two{left:auto;right:-90px;bottom:-190px;transform:rotate(-35deg);background:linear-gradient(120deg,#31543d,#9baa78)}.arch{position:absolute;width:56%;height:77%;bottom:-3%;left:23%;border:14px solid #fff4df;background:linear-gradient(180deg,#f1d9b9,#b9c7a7);border-radius:190px 190px 0 0;box-shadow:0 15px 45px #273e2b20}.arch:after{content:"✦";position:absolute;top:22%;left:40%;font-size:85px;color:#fff8e7;text-shadow:0 8px 25px #8c876a66}.flower{position:absolute;font-size:54px;filter:drop-shadow(0 9px 7px #31422c22)}.f1{top:20%;left:9%;transform:rotate(-20deg)}.f2{top:38%;right:8%;font-size:68px}.f3{bottom:9%;left:18%;font-size:40px}.photo-label{position:absolute;bottom:24px;left:24px;right:24px;display:flex;justify-content:space-between;align-items:end;color:white;z-index:3}.photo-label strong{font-family:'Playfair Display';font-size:24px;font-weight:500}.photo-label span{font-size:10px;letter-spacing:1.4px}.floating-note{position:absolute;top:24px;left:24px;padding:13px 16px;border-radius:14px;background:#fffdf0e8;backdrop-filter:blur(12px);font-size:11px;box-shadow:var(--shadow)}.floating-note strong{display:block;font-size:14px;margin-bottom:3px}.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:1300px;margin:0 auto;padding:0 max(5vw,22px) 30px}.strip-item{padding:19px 20px;border-right:1px solid #dcd8cd}.strip-item:first-child{padding-left:0}.strip-item:last-child{border:0}.strip-item strong{font-family:'Playfair Display';font-size:24px;font-weight:500}.strip-item span{display:block;color:var(--muted);font-size:11px;margin-top:4px}.section{max-width:1300px;margin:auto;padding:64px max(5vw,22px)}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:22px;margin-bottom:25px}.kicker{font-size:10px;letter-spacing:2px;color:var(--green);font-weight:800;text-transform:uppercase}.section h2{font-family:'Playfair Display';font-size:clamp(32px,4vw,48px);font-weight:500;letter-spacing:-1.3px;margin-top:10px}.section-intro{color:var(--muted);font-size:13px;line-height:1.7;margin-top:9px;max-width:530px}.event-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:23px}.filter{border:1px solid #ddd8cc;background:transparent;color:#64675f;border-radius:999px;padding:9px 15px;font-size:11px;font-weight:700}.filter.active,.filter:hover{background:var(--green);color:white;border-color:var(--green)}.events-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.event-card{background:var(--cream);border:1px solid #e7e2d7;border-radius:20px;overflow:hidden;transition:.25s}.event-card:hover{transform:translateY(-5px);box-shadow:var(--shadow)}.event-image{height:220px;position:relative;overflow:hidden;display:grid;place-items:center}.event-image:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#14251d45,transparent 70%)}.event-image .emoji{font-size:70px;filter:drop-shadow(0 12px 12px #29352d35);z-index:1;transition:.3s}.event-card:hover .emoji{transform:scale(1.08) rotate(-4deg)}.img-wedding{background:linear-gradient(145deg,#e4c4b2,#9aaf92)}.img-birthday{background:linear-gradient(145deg,#f3c48d,#e78f81)}.img-college{background:linear-gradient(145deg,#8fc7ba,#467e75)}.img-corporate{background:linear-gradient(145deg,#c3c6b7,#687d70)}.img-party{background:linear-gradient(145deg,#d8a4ad,#785a7c)}.img-concert{background:linear-gradient(145deg,#92a7c8,#394f75)}.event-image .category-tag{position:absolute;top:14px;left:14px;background:#fffdf0dd;padding:7px 10px;border-radius:99px;font-size:9px;font-weight:800;letter-spacing:.7px;z-index:2}.image-upload-tag{position:absolute;right:12px;top:12px;background:#18251e99;color:white;border:1px solid #ffffff55;border-radius:99px;padding:6px 9px;font-size:9px;z-index:2}.event-info{padding:18px}.event-info h3{font-family:'Playfair Display';font-size:22px;font-weight:500}.event-info p{font-size:12px;color:var(--muted);line-height:1.7;margin:8px 0 16px;min-height:40px}.event-foot{border-top:1px solid var(--line);padding-top:14px;display:flex;align-items:center;justify-content:space-between}.event-foot strong{color:var(--green);font-size:13px}.event-foot button{border:1px solid var(--line);background:transparent;border-radius:99px;padding:9px 12px;font-size:11px;font-weight:700}.planner{background:var(--dark);color:white;border-radius:25px;padding:35px;display:grid;grid-template-columns:.8fr 1.2fr;gap:32px}.planner .kicker{color:var(--lime)}.planner h2{font-family:'Playfair Display';font-weight:500;font-size:39px;line-height:1.12;margin:12px 0}.planner p{color:#b8c3b9;font-size:12px;line-height:1.8}.planner-side-note{margin-top:25px;padding:15px;border:1px solid #ffffff24;border-radius:13px;color:#d9e6d8;font-size:11px;line-height:1.7}.planner-form{background:#ffffff0a;border:1px solid #ffffff1a;border-radius:18px;padding:22px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:11px;color:#d3ddd4;font-weight:600}.field input,.field select,.field textarea{width:100%;border:1px solid #ffffff26;background:#18251e;color:white;border-radius:10px;padding:12px;outline:none;font-size:12px}.field input:focus,.field select:focus{border-color:var(--lime)}.field option{background:#18251e}.form-submit{margin-top:15px;width:100%;padding:14px}.estimate-result{display:none;margin-top:14px;border:1px solid #d8f07866;background:#d8f07812;padding:14px;border-radius:12px;font-size:12px;line-height:1.8;color:#e5efc6}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:25px}.feature{background:#efede5;border-radius:17px;padding:22px}.feature-icon{height:42px;width:42px;border-radius:14px;background:#dfe9ce;display:grid;place-items:center;font-size:19px;margin-bottom:15px;color:var(--green)}.feature h3{font-family:'Playfair Display';font-size:20px;font-weight:500;margin-bottom:7px}.feature p{font-size:12px;color:var(--muted);line-height:1.8}.manager-section{background:#e8e9df;border-radius:24px;padding:30px}.manager-head{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.manager-head h2{font-size:35px}.manager-head p{color:var(--muted);font-size:12px;margin-top:7px}.manager-login{max-width:420px;background:var(--cream);padding:25px;border-radius:17px;margin-top:24px;border:1px solid var(--line)}.manager-login label{display:block;font-size:12px;font-weight:700;margin-bottom:8px}.manager-login input{width:100%;padding:13px;border:1px solid var(--line);background:white;border-radius:10px;margin-bottom:12px;outline:none}.demo-hint{font-size:11px;color:var(--muted);margin-top:9px}.manager-dashboard{display:none;margin-top:24px}.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat-card{padding:18px;border-radius:15px;background:var(--cream);border:1px solid var(--line)}.stat-card span{display:block;font-size:10px;color:var(--muted);margin-bottom:7px}.stat-card strong{font-family:'Playfair Display';font-size:28px;font-weight:500}.booking-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 15px}.booking-tools input,.booking-tools select{border:1px solid var(--line);background:var(--cream);padding:10px 12px;border-radius:10px;font-size:11px}.booking-list{display:grid;gap:12px}.booking-card{display:grid;grid-template-columns:1fr auto;gap:16px;background:var(--cream);padding:18px;border:1px solid var(--line);border-radius:15px;align-items:center}.booking-main{display:grid;grid-template-columns:48px 1fr;gap:13px;align-items:start}.booking-symbol{height:46px;width:46px;border-radius:14px;background:#e4ebd7;display:grid;place-items:center;font-size:22px}.booking-main h3{font-family:'Playfair Display';font-size:20px;font-weight:500}.booking-meta{display:flex;gap:8px 14px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:7px}.status{display:inline-flex;padding:5px 9px;border-radius:99px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-top:8px}.status.pending{background:#fff0d5;color:#96631b}.status.approved{background:#dcefdc;color:#2e6842}.status.rejected{background:#f8dedd;color:#a4423d}.booking-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.booking-actions button{border:1px solid var(--line);background:white;padding:8px 10px;border-radius:9px;font-size:10px;font-weight:700}.booking-actions .approve{background:var(--green);color:white;border-color:var(--green)}.booking-actions .reject{color:#a4423d}.empty{padding:28px;text-align:center;color:var(--muted);font-size:12px;background:var(--cream);border-radius:14px}.manager-warning{font-size:11px;line-height:1.7;color:#63685e;margin-top:14px}.footer{padding:28px max(5vw,22px);border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;font-size:11px;color:var(--muted)}.toast{position:fixed;right:20px;bottom:20px;max-width:350px;padding:14px 18px;background:#18251e;color:white;border:1px solid #ffffff25;border-radius:13px;box-shadow:var(--shadow);font-size:12px;line-height:1.6;display:none;z-index:30}.toast.show{display:block;animation:fade .25s ease}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:900px){.navlinks{display:none}.hero-shell{grid-template-columns:1fr}.hero-copy{padding:50px 7%}.hero-visual{min-height:390px}.events-grid{grid-template-columns:repeat(2,1fr)}.planner{grid-template-columns:1fr}.dash-stats{grid-template-columns:repeat(2,1fr)}.booking-card{grid-template-columns:1fr}.booking-actions{justify-content:flex-start}}
+@media(max-width:570px){.topbar{height:68px;padding:0 17px}.brand{font-size:17px}.nav-actions .btn-outline{display:none}.hero{padding:18px 14px 35px}.hero-shell{border-radius:20px}.hero-copy{padding:42px 24px}.hero-visual{min-height:340px}h1{font-size:49px}.strip{padding:0 22px 20px;grid-template-columns:repeat(2,1fr)}.strip-item{padding:15px 10px;border-bottom:1px solid #dcd8cd}.strip-item:first-child{padding-left:10px}.strip-item:nth-child(2){border-right:0}.strip-item:nth-child(3){border-bottom:0}.strip-item:last-child{border-bottom:0}.section{padding:44px 18px}.section-heading{align-items:start;flex-direction:column}.events-grid{grid-template-columns:1fr}.event-image{height:235px}.planner{padding:23px 17px}.planner h2{font-size:34px}.planner-form{padding:16px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.features{grid-template-columns:1fr}.manager-section{padding:20px 14px}.manager-head h2{font-size:29px}.dash-stats{gap:8px}.stat-card{padding:13px}.stat-card strong{font-size:23px}.booking-main{grid-template-columns:40px 1fr}.booking-symbol{width:40px;height:40px}.booking-meta{gap:7px}.footer{padding:24px 18px}}
+
+/* ===== Elegant motion + page navigation upgrade ===== */
+:root{--green:#3157a4;--dark:#17233b;--lime:#f4c96b;--paper:#f4f7fc;--cream:#fff}
+body{background:radial-gradient(circle at 12% 5%,#e6edff 0,transparent 27%),radial-gradient(circle at 92% 28%,#fff0df 0,transparent 24%),var(--paper);background-attachment:fixed}
+.topbar{background:#ffffffed;backdrop-filter:blur(18px);box-shadow:0 5px 24px #233b6410}
+.brand-mark{background:linear-gradient(135deg,#3157a4,#243d76);color:#ffe5a1;box-shadow:0 7px 18px #3157a433}
+.brand span:last-child{color:#243d76}
+.brand span:last-child span{color:#d18c31}
+.btn-dark{background:linear-gradient(135deg,#3157a4,#20396f);box-shadow:0 7px 18px #3157a426}
+.btn-lime{background:linear-gradient(135deg,#ffdf8a,#f2bd50)}
+.hero-shell{background:linear-gradient(135deg,#e8edfb,#f9e8d9);box-shadow:0 24px 70px #293e6415}
+.hero-visual{background:#c5d2ed}
+.hero-visual .photo{background:linear-gradient(0deg,#18294799,transparent 55%),linear-gradient(135deg,#b7c7eb,#f1d7bf 55%,#819fc5)}
+.sun{background:#ffe0a1;animation:floatSun 8s ease-in-out infinite}
+.leaf{background:linear-gradient(120deg,#253f78,#7695c9)}
+.leaf.two{background:linear-gradient(120deg,#365d99,#c0cce8)}
+.arch{border-color:#fff9ee;background:linear-gradient(180deg,#fff0d8,#b8c8e7)}
+.event-card,.planner-form,.manager-login,.stat-card,.booking-card{box-shadow:0 8px 26px #263e6810}
+.event-card{transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s}
+.event-card:hover{border-color:#a9bbe4;box-shadow:0 20px 42px #263e6820}
+.event-image{isolation:isolate}
+.event-image:after{content:"";position:absolute;inset:-80% -30%;background:linear-gradient(110deg,transparent 40%,#ffffff45 50%,transparent 60%);transform:translateX(-65%) rotate(12deg);transition:transform .7s;z-index:1;pointer-events:none}
+.event-card:hover .event-image:after{transform:translateX(65%) rotate(12deg)}
+.img-wedding{background:linear-gradient(145deg,#f4d6ce,#a8c5b0)}
+.img-birthday{background:linear-gradient(145deg,#ffe0a6,#f2a6a0)}
+.img-college{background:linear-gradient(145deg,#b9e6df,#4c8b9c)}
+.img-corporate{background:linear-gradient(145deg,#dce5f3,#8298b8)}
+.img-party{background:linear-gradient(145deg,#f1c6dc,#8c7db4)}
+.img-concert{background:linear-gradient(145deg,#c1d3f4,#3c5689)}
+.planner{background:linear-gradient(135deg,#17233b,#263f70);box-shadow:0 22px 55px #17233b24}
+.planner .kicker{color:#ffdc87}
+.feature{background:linear-gradient(145deg,#fff,#f0f4fc);border:1px solid #e2e8f4;transition:transform .3s,box-shadow .3s}
+.feature:hover{transform:translateY(-5px);box-shadow:var(--shadow)}
+.feature-icon{background:#e3ebff;color:#3157a4}
+.manager-section{background:linear-gradient(135deg,#e8edfa,#f7eee5);border:1px solid #e0e6f2}
+.status.pending{background:#fff0cf;color:#936117}
+.status.approved{background:#dff4e8;color:#226647}
+.status.rejected{background:#ffe5e3;color:#a13f48}
+.page-hidden{display:none!important}
+.page-enter{animation:pageEnter .55s cubic-bezier(.2,.8,.2,1) both}
+.reveal-ready .hero-copy,.reveal-ready .hero-visual,.reveal-ready .strip-item,.reveal-ready .event-card,.reveal-ready .planner,.reveal-ready .feature,.reveal-ready .manager-section{animation:riseIn .7s cubic-bezier(.2,.8,.2,1) both}
+.reveal-ready .event-card:nth-child(2),.reveal-ready .feature:nth-child(2){animation-delay:.08s}
+.reveal-ready .event-card:nth-child(3),.reveal-ready .feature:nth-child(3){animation-delay:.16s}
+.reveal-ready .event-card:nth-child(4){animation-delay:.08s}
+.reveal-ready .event-card:nth-child(5){animation-delay:.16s}
+.reveal-ready .event-card:nth-child(6){animation-delay:.24s}
+@keyframes pageEnter{from{opacity:0;transform:translateY(14px) scale(.995)}to{opacity:1;transform:none}}
+@keyframes riseIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes floatSun{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+
+/* About, real event photography, ratings and reviews */
+.hero-visual .photo{background-image:linear-gradient(0deg,#17233b99,transparent 65%),url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=90');background-size:cover;background-position:center;transform:scale(1.02);animation:photoDrift 18s ease-in-out infinite alternate}
+@keyframes photoDrift{from{transform:scale(1.02)}to{transform:scale(1.11)}}
+.event-image{background:#dce5f4}.event-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s;z-index:0}.event-card:hover .event-photo{transform:scale(1.07)}.event-image:before{z-index:1;pointer-events:none}.event-image .emoji{display:none}.event-image .category-tag,.event-image .image-upload-tag{z-index:2}
+.about-panel{display:grid;grid-template-columns:1fr 1fr;gap:clamp(25px,5vw,70px);align-items:center;background:#fff;border:1px solid var(--line);border-radius:26px;padding:clamp(18px,3vw,38px);box-shadow:var(--shadow)}.about-image{position:relative;min-height:440px;border-radius:19px;overflow:hidden}.about-image img{position:absolute;width:100%;height:100%;object-fit:cover;inset:0;transition:transform .6s}.about-image:hover img{transform:scale(1.04)}.about-image:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#17233b99)}.about-image-note{position:absolute;z-index:1;bottom:22px;left:22px;color:white;display:grid;gap:6px}.about-image-note strong{font:25px 'Playfair Display',serif}.about-image-note span{font-size:12px}.about-copy>p{font-size:14px;color:var(--muted);line-height:1.9;margin:18px 0}.about-points{display:grid;gap:17px;margin:22px 0 27px}.about-points>div{display:flex;gap:13px;align-items:flex-start}.about-points>div>span{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;background:#e8eefb;color:var(--green);border-radius:12px;font-weight:800}.about-points strong{font-size:13px}.about-points p{font-size:12px;color:var(--muted);line-height:1.7;margin-top:4px}
+.rating-summary{background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px 23px;min-width:150px;text-align:center;box-shadow:var(--shadow)}.rating-summary strong{font:42px 'Playfair Display',serif}.stars{color:#efa92e;letter-spacing:2px;font-size:17px;margin:4px 0}.rating-summary span{font-size:10px;color:var(--muted)}.review-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.review-card{padding:23px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 25px #243b680c;animation:riseIn .5s both}.review-top{display:flex;align-items:center;gap:12px}.review-avatar{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:#e7edfb;color:var(--green);font-weight:800}.review-person{flex:1}.review-person strong{display:block;font-size:12px}.review-person span{font-size:10px;color:var(--muted)}.review-card .stars{font-size:13px;letter-spacing:1px}.review-card p{font-size:12px;color:#596579;line-height:1.8;margin-top:12px}.review-form-wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:30px;margin-top:30px;padding:28px;background:#eaf0fb;border-radius:22px}.review-form-wrap h3{font-size:30px;margin:9px 0}.review-form-wrap p{font-size:12px;color:var(--muted);line-height:1.8}.review-form{background:#fff;padding:22px;border-radius:16px}.review-fields{display:grid;grid-template-columns:1fr 1fr;gap:13px}.review-form .field label{color:#34415b}.review-form .field input,.review-form .field select,.review-form .field textarea{background:#f8faff;border:1px solid #dce4f3;color:var(--ink);font-size:12px}.review-form textarea{resize:vertical}.review-form .btn{margin-top:15px}.page-hidden{display:none!important}
+@media(max-width:900px){.navlinks{gap:12px}.about-panel{grid-template-columns:1fr}.about-image{min-height:330px}.review-form-wrap{grid-template-columns:1fr}.review-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.topbar{height:auto;min-height:70px;flex-wrap:wrap;gap:12px;padding-top:12px;padding-bottom:12px}.navlinks{order:3;width:100%;overflow-x:auto;padding:4px 0 8px}.nav-actions .btn-outline{display:none}.review-grid{grid-template-columns:1fr}.review-fields{grid-template-columns:1fr}.rating-summary{min-width:110px;padding:12px}.about-image{min-height:270px}}
+
+
+/* PREMIUM VISUAL UPGRADE — animated backdrop, contrast palette, and micro-interactions */
+:root{--ink:#11152b;--paper:#f6f7ff;--cream:#fff;--muted:#626982;--green:#4736c9;--lime:#ffcf56;--orange:#ff6d8a;--line:#e0e3f3;--dark:#11152b;--shadow:0 24px 70px #211b6320}
+body{background:radial-gradient(circle at 8% 10%,#eceaff 0,transparent 28%),radial-gradient(circle at 92% 35%,#ffe7ef 0,transparent 24%),var(--paper);background-attachment:fixed}
+body:before,body:after{content:"";position:fixed;z-index:-1;pointer-events:none;border-radius:50%;filter:blur(2px);opacity:.35;animation:floatOrb 17s ease-in-out infinite alternate}
+body:before{width:320px;height:320px;left:-130px;top:18%;background:linear-gradient(135deg,#8b7cff,#d8d3ff)}
+body:after{width:260px;height:260px;right:-90px;top:58%;background:linear-gradient(135deg,#ff9eb5,#ffe0a1);animation-delay:-7s}
+@keyframes floatOrb{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(36px,-42px,0) scale(1.12)}100%{transform:translate3d(-18px,30px,0) scale(.94)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes softPulse{0%,100%{box-shadow:0 0 0 0 #ffcf5630}50%{box-shadow:0 0 0 12px #ffcf5600}}
+@keyframes slowPan{0%{background-position:50% 50%;transform:scale(1)}100%{background-position:58% 45%;transform:scale(1.06)}}
+.topbar{background:#ffffffd9;backdrop-filter:blur(18px);border-bottom-color:#dfe1f4}
+.brand-mark{background:linear-gradient(135deg,#4736c9,#8878ff);color:#fff;box-shadow:0 8px 22px #4736c933}
+.brand span:last-child{color:#4736c9}
+.navlinks{color:#424761}.navlinks a:hover,.navlinks a.nav-current{color:#4736c9}
+.navlinks a.nav-current:after{background:#ff6d8a}
+.btn-dark{background:linear-gradient(115deg,#30219f,#6554e8);color:#fff;box-shadow:0 8px 20px #4736c926}
+.btn-lime{background:linear-gradient(115deg,#ffd45e,#ffb85a);color:#19132d}
+.btn-outline{border-color:#cfd2e9;background:#ffffff80}
+.btn:hover{filter:saturate(1.15);box-shadow:0 12px 28px #211b6320}
+.hero-shell{background:linear-gradient(125deg,#fff 0%,#f1efff 50%,#ffeaf0 100%);box-shadow:0 28px 90px #30219f14;animation:fadeUp .8s both}
+.hero-copy h1 em{background:linear-gradient(100deg,#4736c9,#ff6d8a);background-clip:text;-webkit-background-clip:text;color:transparent}
+.hero-visual .photo{background:linear-gradient(125deg,#24165b88,#f15b8b33),linear-gradient(135deg,#8477ed,#ffc4d5 55%,#ffcf56);animation:slowPan 16s ease-in-out infinite alternate}
+.sun{background:#ffcf56;animation:softPulse 5s ease-in-out infinite}
+.arch{background:linear-gradient(180deg,#fff0f5,#bdb6ff);border-color:#fff;box-shadow:0 15px 55px #30219f2b}
+.leaf{background:linear-gradient(120deg,#30219f,#b3a9ff)}.leaf.two{background:linear-gradient(120deg,#ff6d8a,#ffd1a0)}
+.floating-note{background:#ffffffdc;border:1px solid #ffffff}
+.strip-item{border-color:#dfe1f4}.strip-item strong{color:#30219f}
+.kicker,.eyebrow{color:#4736c9}.eyebrow:before{background:#ff6d8a}
+.event-card,.feature,.manager-section,.about-panel,.review-card{box-shadow:0 12px 40px #30219f0b}
+.event-card{border-color:#e0e3f3}.event-card:hover{box-shadow:0 24px 50px #30219f1c}
+.event-foot strong{color:#4736c9}
+.filter.active,.filter:hover{background:#4736c9;border-color:#4736c9}
+.planner{background:radial-gradient(circle at 95% 5%,#5746dc 0,transparent 33%),linear-gradient(130deg,#11152b,#211a54);box-shadow:0 25px 70px #11152b24}
+.planner .kicker{color:#ffcf56}
+.feature-icon{background:#e9e6ff;color:#4736c9}
+.manager-section{background:linear-gradient(135deg,#efedff,#fff0f4);border:1px solid #e2defb}
+.manager-head h2{color:#171333}
+.premium-login{max-width:470px!important;position:relative;overflow:hidden;background:#fff!important;border:1px solid #e1ddff!important;border-radius:24px!important;padding:30px!important;box-shadow:0 22px 65px #30219f18!important}
+.premium-login:before{content:"";position:absolute;right:-65px;top:-90px;width:190px;height:190px;border-radius:50%;background:linear-gradient(135deg,#e8e3ff,#ffe0e9);z-index:0}
+.premium-login>*{position:relative;z-index:1}
+.login-emblem{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#4736c9,#a093ff);color:white;font-size:24px;box-shadow:0 10px 24px #4736c933;margin-bottom:17px}
+.login-eyebrow{font-size:9px;letter-spacing:2px;font-weight:800;color:#6554e8;margin-bottom:7px}
+.premium-login h3{font-size:32px;color:#171333;margin-bottom:7px}
+.login-subtitle{font-size:12px;line-height:1.7;color:#6b7088;margin-bottom:22px}
+.premium-login>label{display:block;font-size:11px;font-weight:800;color:#272744;margin:15px 0 7px}
+.premium-login>input,.password-wrap input{width:100%;padding:13px 14px;border:1px solid #dfe0f2;border-radius:12px;background:#fafaff;color:#171333;font-size:12px;outline:none}
+.premium-login input:focus{border-color:#7463ed;box-shadow:0 0 0 4px #7463ed18}
+.password-wrap{display:flex;align-items:center;position:relative}
+.password-wrap input{padding-right:60px}
+.password-wrap button{position:absolute;right:9px;border:0;background:transparent;color:#5546c4;font-weight:800;font-size:11px;padding:8px}
+.login-options{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 0 17px;font-size:10px;color:#777b92}
+.login-options .remember-label{display:flex;align-items:center;gap:6px;margin:0;font-weight:500}
+.remember-label input{accent-color:#4736c9}
+.login-submit{border-radius:12px;padding:14px!important;font-size:12px!important;justify-content:space-between!important}
+.login-error{min-height:18px;color:#c42b52;font-size:11px;margin-top:10px}
+.manager-warning{font-size:10px!important;line-height:1.65!important;color:#7a6270!important;background:#fff3f6;border:1px solid #ffe0e8;border-radius:11px;padding:11px;margin-top:12px}
+.contact-shell{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;background:#fff;border:1px solid #e2e3f5;border-radius:28px;overflow:hidden;box-shadow:0 24px 70px #30219f12}
+.contact-copy{padding:clamp(28px,5vw,58px)}
+.contact-copy h2{font-size:clamp(34px,4vw,49px);line-height:1.12;max-width:560px;margin:13px 0 17px;color:#171333}
+.contact-copy>p{font-size:13px;color:#676d86;line-height:1.85;max-width:550px}
+.contact-links{display:grid;gap:13px;margin-top:28px}
+.contact-links>a,.contact-links>div{display:flex;align-items:center;gap:13px}
+.contact-icon{width:44px;height:44px;flex-shrink:0;border-radius:14px;background:#efedff;color:#4736c9;display:grid;place-items:center;font-size:19px}
+.contact-links small{display:block;font-size:9px;letter-spacing:1.3px;color:#777b92;font-weight:800;margin-bottom:4px}
+.contact-links strong{font-size:13px;color:#171333}
+.contact-edit-note{font-size:10px!important;color:#8a7180!important;margin-top:24px}
+.contact-card{padding:clamp(28px,4vw,45px);background:radial-gradient(circle at 90% 10%,#5e4bd9 0,transparent 35%),linear-gradient(145deg,#17152f,#30216e);color:white;display:flex;flex-direction:column;justify-content:center;min-height:390px}
+.contact-pill{align-self:flex-start;border:1px solid #ffffff40;background:#ffffff12;padding:9px 12px;border-radius:99px;font-size:9px;letter-spacing:1.2px;color:#ffe09a}
+.contact-card h3{font-size:38px;margin:22px 0 10px}
+.contact-card p{font-size:12px;line-height:1.8;color:#d4d2ed;max-width:340px;margin-bottom:22px}
+.contact-card .btn{align-self:flex-start}
+.social-links{display:flex;gap:9px;margin-top:29px}
+.social-links a{width:36px;height:36px;border:1px solid #ffffff4a;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;transition:.25s}
+.social-links a:hover{background:#ffcf56;color:#171333;transform:translateY(-4px)}
+.social-caption{color:#c5c2e7;font-size:9px;margin-top:9px}
+.footer{background:#11152b!important;color:#e7e7fa!important;border-top:3px solid #ff6d8a}
+.footer .brand span:last-child{color:#fff}
+.section{animation:fadeUp .7s both}
+@media(max-width:760px){.contact-shell{grid-template-columns:1fr}.contact-card{min-height:300px}.login-options{align-items:flex-start;flex-direction:column}.premium-login{padding:23px!important}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+.manager-dashboard>#managerReviewList{margin-bottom:16px}.booking-actions button[data-action="whatsapp"]{background:#e8f8ef;border-color:#b9e6cb;color:#176b3a}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <a class="brand" href="#home"><span class="brand-mark">¥</span></span><span>EVENT<span> PLANNER</span></span></a>
+ <nav class="navlinks"><a href="#home" data-page="home">Home</a><a href="#experiences" data-page="experiences">Events</a><a href="#planner" data-page="planner">Book an event</a><a href="#about" data-page="about">About</a></nav>
+ <div class="nav-actions"><a class="btn btn-dark" href="#planner" data-page="planner">Book an event ↗</a></div>
+</header>
+<main>
+<section class="hero" id="home"><div class="hero-shell">
+ <div class="hero-copy"><div class="eyebrow">EVENT MANAGEMENT, MADE ELEGANT</div><h1>Plan beautifully.<br><em>Celebrate brilliantly.</em></h1><p>Beautiful celebrations begin with a little imagination. Find your style, shape your budget, and bring the details together — all in one calm, creative space.</p><div class="hero-buttons"><a class="btn btn-dark" href="#experiences" data-page="experiences">Explore events ↗</a><a class="btn btn-outline" href="#planner" data-page="planner">Build your plan</a></div><div class="hero-note"><div class="tiny-dots"><span>✦</span><span>♡</span><span>✳</span></div><span>For the little moments and the once-in-a-lifetime ones.</span></div></div>
+ <div class="hero-visual"><div class="photo" role="img" aria-label="Elegant outdoor wedding celebration"></div><div class="sun"></div><div class="leaf"></div><div class="leaf two"></div><div class="arch"></div><span class="flower f1">✿</span><span class="flower f2">✾</span><span class="flower f3">❋</span><div class="floating-note"><strong>Made for your moment ✦</strong><span>Personal, considered, unforgettable</span></div><div class="photo-label"><div><span>THE ART OF GETTING TOGETHER</span><br><strong>Every detail, with feeling.</strong></div><span>01 — 06</span></div></div>
+</div></section>
+<div class="strip"><div class="strip-item"><strong>Dream</strong><span>Find a style that feels like you</span></div><div class="strip-item"><strong>Design</strong><span>Shape the details your way</span></div><div class="strip-item"><strong>Balance</strong><span>Keep your budget in view</span></div><div class="strip-item"><strong>Celebrate</strong><span>Be there for the moment</span></div></div>
+<section class="section" id="experiences"><div class="section-heading"><div><div class="kicker">Start with the feeling</div><h2 class="serif">What are we gathering for?</h2><p class="section-intro">A few ideas to get you inspired. Pick an occasion and make it your own — your event, your rules.</p></div><a href="#planner" data-page="planner" class="btn btn-outline">Create a custom event ↗</a></div>
+<div class="event-filters"><button class="filter active" data-filter="all">Everything</button><button class="filter" data-filter="wedding">Weddings</button><button class="filter" data-filter="birthday">Birthdays</button><button class="filter" data-filter="college">College events</button><button class="filter" data-filter="corporate">Corporate</button><button class="filter" data-filter="party">Parties</button><button class="filter" data-filter="concert">Live shows</button></div>
+<div class="events-grid">
+<article class="event-card" data-category="wedding"><div class="event-image img-wedding"><img class="event-photo" src="images/wedd.png" alt="Elegant wedding reception" loading="lazy"><span class="category-tag">LOVE, WITH INTENTION</span><span class="image-upload-tag">EVENT GALLERY</span><span class="emoji">💐</span></div><div class="event-info"><h3>The Wedding Story</h3><p>Soft florals, warm light and thoughtful details for your once-in-a-lifetime day.</p><div class="event-foot"><strong>From ₹1,50,000</strong><button data-event="wedding">Plan this ↗</button></div></div></article>
+<article class="event-card" data-category="birthday"><div class="event-image img-birthday"><img class="event-photo" src="images/bir.png" alt="Birthday party decorations" loading="lazy"><span class="category-tag">ANOTHER TRIP AROUND THE SUN</span><span class="image-upload-tag">EVENT GALLERY</span><span class="emoji">🎂</span></div><div class="event-info"><h3>Birthday, Reimagined</h3><p>Playful themes, a beautiful cake and a room full of your favourite people.</p><div class="event-foot"><strong>From ₹8,000</strong><button data-event="birthday">Plan this ↗</button></div></div></article>
+<article class="event-card" data-category="college"><div class="event-image img-college"><img class="event-photo" src="images/fest.png" alt="College event and students" loading="lazy"><span class="category-tag">CAMPUS ENERGY</span><span class="image-upload-tag">EVENT GALLERY</span><span class="emoji">🎓</span></div><div class="event-info"><h3>Campus & College Fest</h3><p>Big-stage energy, student talent and shared memories that last beyond college.</p><div class="event-foot"><strong>From ₹25,000</strong><button data-event="college">Plan this ↗</button></div></div></article>
+<article class="event-card" data-category="corporate"><div class="event-image img-corporate"><img class="event-photo" src="images/corparate.png" alt="Corporate event setup" loading="lazy"><span class="category-tag">GOOD PEOPLE, GOOD WORK</span><span class="image-upload-tag">EVENT GALLERY</span><span class="emoji">🥂</span></div><div class="event-info"><h3>Corporate Gatherings</h3><p>Launches, team evenings and company milestones with a polished, human touch.</p><div class="event-foot"><strong>From ₹40,000</strong><button data-event="corporate">Plan this ↗</button></div></div></article>
+<article class="event-card" data-category="party"><div class="event-image img-party"><img class="event-photo" src="images/festt.png" alt="Party lights and crowd" loading="lazy"><span class="category-tag">GOOD MUSIC, BETTER COMPANY</span><span class="image-upload-tag">EVENT GALLERY</span><span class="emoji">🪩</span></div><div class="event-info"><h3>Just Because Party</h3><p>Statement lighting, music and a vibe that makes an ordinary day feel special.</p><div class="event-foot"><strong>From ₹15,000</strong><button data-event="party">Plan this ↗</button></div></div></article>
+<article class="event-card" data-category="concert"><div class="event-image img-concert"><img class="event-photo" src="images/concert.png" alt="Live concert stage" loading="lazy"><span class="category-tag">TURN UP THE MOMENT</span><span class="image-upload-tag">EVENT GALLERY</span><span class="emoji">🎤</span></div><div class="event-info"><h3>Live Shows & Concerts</h3><p>Stage, sound, performers and the buzz of being in the crowd together.</p><div class="event-foot"><strong>From ₹60,000</strong><button data-event="concert">Plan this ↗</button></div></div></article>
+</div></section>
+<section class="section" id="about"><div class="about-panel"><div class="about-image"><img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=85" alt="Beautifully arranged event venue" loading="lazy"><div class="about-image-note"><strong>Made for your moments</strong><span>From first idea to final toast ✦</span></div></div><div class="about-copy"><div class="kicker">A little about us</div><h2 class="serif">Good events feel effortless.</h2><p>Event Management System helps you turn an idea into a thoughtful celebration. Explore event inspiration, submit your requirements, set a budget and let a manager review the plan.</p><div class="about-points"><div><span>✦</span><div><strong>Personal planning</strong><p>Build an event around your style, guests and occasion.</p></div></div><div><span>₹</span><div><strong>Budget clarity</strong><p>Compare your budget with a manager-reviewed estimate.</p></div></div><div><span>♡</span><div><strong>One organised place</strong><p>Keep booking requests and event details together.</p></div></div></div><a class="btn btn-dark" href="#planner" data-page="planner">Plan your event ↗</a></div></div></section>
+<section class="section" id="planner"><div class="planner"><div><div class="kicker">Your first draft starts here</div><h2>Make room for a little magic.</h2><p>Tell us the basics and get an instant illustrative cost split. Try different guest counts and event styles to find a plan that feels right.</p><div class="planner-side-note">✳ Estimates are editable planning guides, not supplier quotations. Your event request will be reviewed by our event manager.</div></div>
+<form class="planner-form" id="bookingForm"><div class="form-grid">
+<div class="field full"><label for="bookingTitle">Event name</label><input id="bookingTitle" placeholder="e.g. Annual College Day" required maxlength="70"></div>
+<div class="field"><label for="bookingType">Event type</label><select id="bookingType"><option value="birthday">Birthday</option><option value="wedding">Wedding</option><option value="college">College event</option><option value="corporate">Corporate</option><option value="party">Party</option><option value="concert">Live show</option></select></div>
+<div class="field"><label for="guestCount">Expected guests</label><input id="guestCount" type="number" min="10" max="10000" value="100" required><small id="liveEstimate" style="color:#ffe09a;font-size:11px">Estimated cost: ₹50,000</small></div>
+<div class="field"><label for="customerName">Your name</label><input id="customerName" placeholder="Full name" required maxlength="70"></div>
+<div class="field"><label for="customerContact">Phone / email</label><input id="customerContact" placeholder="Contact detail" required maxlength="100"></div>
+<div class="field"><label for="eventDate">Preferred date</label><input id="eventDate" type="date" required></div>
+<div class="field"><label for="eventTime">Preferred time</label><input id="eventTime" type="time" required></div>
+<div class="field full"><label for="eventVenue">Preferred venue / location</label><input id="eventVenue" placeholder="Venue name or location" required maxlength="120"></div>
+<div class="field"><label for="eventBudget">Budget (₹)</label><input id="eventBudget" type="number" min="1000" value="50000" required></div>
+<div class="field full"><label for="eventNotes">Anything the manager should know?</label><input id="eventNotes" placeholder="Venue, theme, special requests (optional)" maxlength="250"></div>
+</div><button class="btn btn-lime form-submit" type="submit">Send event request ↗</button><div class="estimate-result" id="bookingResult"></div></form>
+</div></section>
+<section class="section" id="features"><div class="kicker">Thoughtful by design</div><h2 class="serif">A better feeling from start to finish.</h2><p class="section-intro">The little details that make planning feel less overwhelming and a lot more exciting.</p><div class="features"><article class="feature"><div class="feature-icon">✳</div><h3>Your style, your story</h3><p>Explore different event directions and use them as a starting point for your own idea.</p></article><article class="feature"><div class="feature-icon">₹</div><h3>Budget without guesswork</h3><p>See estimated costs across venue, food, décor, photography and entertainment.</p></article><article class="feature"><div class="feature-icon">♡</div><h3>Personal event support</h3><p>Review booking requests, update event details and manage the plan in one dashboard.</p></article></div></section>
+<section class="section" id="reviews"><div class="section-heading"><div><div class="kicker">Kind words, shared moments</div><h2 class="serif">Reviews from our community.</h2><p class="section-intro">These sample reviews demonstrate the feedback feature. Visitors can add a rating and review; entries are saved in this browser only.</p></div><div class="rating-summary"><strong id="averageRating">4.8</strong><div class="stars" id="averageStars">★★★★★</div><span id="reviewCount">Sample guest reviews</span></div></div><div class="review-grid" id="reviewGrid"></div><div class="review-form-wrap"><div><div class="kicker">Your experience matters</div><h3 class="serif">Leave a review</h3><p>Tell us what went well and what we can improve.</p></div><form id="reviewForm" class="review-form"><div class="review-fields"><div class="field"><label for="reviewName">Your name</label><input id="reviewName" required maxlength="50" placeholder="Name"></div><div class="field"><label for="reviewEvent">Event type</label><select id="reviewEvent"><option>Wedding</option><option>Birthday</option><option>College event</option><option>Corporate</option><option>Party</option><option>Live show</option><option>Other</option></select></div><div class="field full"><label for="reviewRating">Your rating</label><select id="reviewRating" required><option value="5">★★★★★ — Excellent</option><option value="4">★★★★☆ — Very good</option><option value="3">★★★☆☆ — Good</option><option value="2">★★☆☆☆ — Needs improvement</option><option value="1">★☆☆☆☆ — Poor</option></select></div><div class="field full"><label for="reviewText">Your review</label><textarea id="reviewText" rows="3" maxlength="500" placeholder="Share a few details about your experience…" required></textarea></div></div><button class="btn btn-dark" type="submit">Submit review ↗</button></form></div></section>
+
+<section class="section" id="contact">
+  <div class="contact-shell">
+    <div class="contact-copy">
+      <div class="kicker">LET'S MAKE IT HAPPEN</div>
+      <h2 class="serif">Your next favourite memory starts here.</h2>
+      <p>Have a question, a big idea, or a date in mind? Tell us what you are imagining. We’ll help you turn the first thought into a thoughtful plan.</p>
+      <div class="contact-links">
+        <a href="mailto:rudruyaswanth@gmail.com"><span class="contact-icon">✉</span><span><small>EMAIL US</small><strong>rudruyaswanth@gmail.com</strong></span></a>
+        <a href="tel:+919398653404"><span class="contact-icon">☎</span><span><small>CALL / WHATSAPP</small><strong>+91 93986 53404</strong></span></a>
+        <div><span class="contact-icon">⌖</span><span><small>OUR LOCATION</small><strong>VIJAYAWADA</strong></span></div>
+      </div>
+    </div>
+    <div class="contact-card">
+      <span class="contact-pill">✦ WE'D LOVE TO HEAR FROM YOU</span>
+      <h3 class="serif">Let’s talk details.</h3>
+      <p>For a faster response, include your event date and approximate guest count in your booking request.</p>
+      <a class="btn btn-lime" href="#planner" data-page="planner">Start a booking ↗</a>
+      <div class="social-links">
+        
+        <a href="https://instagram.com/itzz_.yashuuu" target="_blank" rel="noreferrer" aria-label="Visit our Instagram profile">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" width="35" height="35"></a>
+        <a href="https://facebook.com/" target="_blank" rel="noreferrer" aria-label="Facebook"><img src="https://cdn.simpleicons.org/facebook/1877F2" alt="FaceBook"> </a>
+        <a href="https://wa.me/919398653404" target="_blank" rel="noreferrer" aria-label="WhatsApp"><img src="https://cdn.simpleicons.org/whatsapp/25D366" alt="WhatsApp"> </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section" id="manager"><div class="manager-section"><div class="manager-head"><div><div class="kicker">Behind every lovely event</div><h2 class="serif">Manager workspace.</h2><p>Review bookings, approve requests, update costs and keep event details organised.</p></div><span class="btn btn-outline">MANAGER ACCESS</span></div>
+<div class="manager-login premium-login" id="managerLogin">
+  <div class="login-emblem">✦</div><div class="login-eyebrow">RESTRICTED WORKSPACE</div>
+  <h3 class="serif">Welcome back.</h3><p class="login-subtitle">Sign in to review requests, manage estimates and update event plans.</p>
+  <label for="managerUsername">Manager username</label><input id="managerUsername" type="text" autocomplete="username" placeholder="Enter manager username" value="manager">
+  <label for="managerPassword">Password</label><div class="password-wrap"><input id="managerPassword" type="password" autocomplete="current-password" placeholder="Enter manager password"><button type="button" id="togglePassword" aria-label="Show password">Show</button></div>
+  <div class="login-options"><span>🔒 Private area</span><span>5 failed attempts = 30-second pause</span></div>
+  <button class="btn btn-dark login-submit" id="loginButton" style="width:100%">Secure sign in <span>↗</span></button>
+  <div class="login-error" id="loginError" role="alert"></div>
+  <p class="manager-warning">Prototype login only: credentials in frontend code can be discovered. Do not use this version for real customer records. Production security needs server-side authentication, password hashing, rate limiting and a database.</p>
+</div>
+<div class="manager-dashboard" id="managerDashboard"><div class="dash-stats"><div class="stat-card"><span>Total requests</span><strong id="statTotal">0</strong></div><div class="stat-card"><span>Awaiting review</span><strong id="statPending">0</strong></div><div class="stat-card"><span>Approved</span><strong id="statApproved">0</strong></div><div class="stat-card"><span>Estimated booking value</span><strong id="statValue">₹0</strong></div></div>
+<h3 class="serif" style="font-size:27px;margin:24px 0 12px">Customer booking requests</h3><div class="booking-tools"><input id="searchBookings" placeholder="Search customer or event…"><select id="statusFilter"><option value="all">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select><button class="btn btn-outline btn-small" id="addDemoBooking">+ Add sample request</button><button class="btn btn-outline btn-small" id="logoutButton">Lock dashboard</button></div><div class="booking-list" id="bookingList"></div><h3 class="serif" style="font-size:27px;margin:30px 0 12px">Customer reviews</h3><div class="review-grid" id="managerReviewList"></div><p class="manager-warning">This single-file demo stores data in this browser only. To share bookings and reviews between different customers/devices, connect this page to a shared backend database.</p>
+</div></div></section>
+</main>
+<footer class="footer"><a class="brand" href="#home"><span class="brand-mark">¥</span><span>EVENT<span> PLANNER</span></span></a><span>Event Management System · Plan beautifully. Celebrate brilliantly.</span><a href="#about">Contact us ↗</a><a href="#home">Back to top ↑</a></footer>
+<div class="toast" id="toast" role="status"></div>
+<script>
+
+// Page-style navigation: each main destination opens as its own screen.
+const pageTargets = ["home","experiences","about","planner","features","manager"];
+const DEMO_MANAGER_USERNAME = "manager";
+const DEMO_MANAGER_PASSWORD = "yashu@2026";
+let managerLoginFailures = 0;
+let managerLockedUntil = 0;
+function showPage(target, updateHash=true){
+  if(!pageTargets.includes(target)) target="home";
+  const sections = [...document.querySelectorAll("main > .hero, main > .strip, main > .section")];
+  sections.forEach(el=>{
+    const id=el.id || (el.classList.contains("hero") ? "home" : "");
+    const visible = target==="home" ? (id==="home" || el.classList.contains("strip")) : (target==="about" ? ["about","reviews","contact"].includes(id) : id===target);
+    el.classList.toggle("page-hidden",!visible);
+    if(visible){el.classList.remove("page-enter"); void el.offsetWidth; el.classList.add("page-enter");}
+  });
+  document.body.classList.add("reveal-ready");
+  if(updateHash) history.replaceState(null,"","#"+target);
+  window.scrollTo({top:0,behavior:"smooth"});
+  document.querySelectorAll("[data-page]").forEach(a=>a.classList.toggle("nav-current",a.dataset.page===target));
+}
+document.addEventListener("click",ev=>{
+  const link=ev.target.closest('a[data-page], a[href="#home"]');
+  if(!link)return;
+  const target=link.dataset.page || "home";
+  ev.preventDefault();
+  showPage(target);
+});
+window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)||"home",false));
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const eventLabels={birthday:"Birthday",wedding:"Wedding",college:"College event",corporate:"Corporate",party:"Party",concert:"Live show"};
+const symbols={birthday:"🎂",wedding:"💐",college:"🎓",corporate:"🥂",party:"🪩",concert:"🎤"};
+const starterBookings=[
+{id:1,title:"Annual Tech Fest",type:"college",name:"Kavya Reddy",contact:"kavya@example.com",date:"2026-11-18",time:"10:00",venue:"College campus",guests:450,budget:85000,cost:78000,status:"pending",notes:"Stage, sound and food stalls"},
+{id:2,title:"Wedding Reception",type:"wedding",name:"Arjun Kumar",contact:"98765 43210",date:"2026-12-06",time:"18:00",venue:"Garden venue",guests:300,budget:250000,cost:225000,status:"approved",notes:"Garden theme, warm lights"},
+{id:3,title:"Surprise 25th Birthday",type:"birthday",name:"Meera S.",contact:"meera@example.com",date:"2026-11-02",time:"19:00",venue:"Terrace venue",guests:60,budget:30000,cost:27500,status:"pending",notes:"Pastel décor"}
+];
+function readSaved(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch(e){return fallback}}
+let bookings=readSaved("eventFlowBookings",starterBookings);
+let nextId=Math.max(0,...bookings.map(b=>Number(b.id)||0))+1;
+function saveBookings(){try{localStorage.setItem("eventFlowBookings",JSON.stringify(bookings))}catch(e){toast("Browser storage is full; connect a database for reliable storage.")}}
+const perGuestRates={birthday:500,wedding:1800,college:350,corporate:700,party:450,concert:900};
+function estimateCost(type,guests){return Math.round((perGuestRates[type]||500)*Math.max(1,Number(guests)||1))}
+function updateLiveEstimate(){const el=$("#liveEstimate");if(el)el.textContent="Estimated cost: "+money(estimateCost($("#bookingType").value,$("#guestCount").value));}
+$("#guestCount").addEventListener("input",updateLiveEstimate);$("#bookingType").addEventListener("change",updateLiveEstimate);
+function money(n){return "₹"+Math.max(0,Math.round(Number(n)||0)).toLocaleString("en-IN")}
+window.addEventListener("DOMContentLoaded",()=>{showPage(location.hash.slice(1)||"home",false);renderReviews();updateLiveEstimate();});
+window.addEventListener("storage",e=>{if(e.key==="eventFlowBookings"){bookings=readSaved("eventFlowBookings",[]);renderBookings()}if(e.key==="eventFlowReviews"){reviews=readSaved("eventFlowReviews",[]);renderReviews()}});
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3300)}
+
+const starterReviews=[
+ {name:"Ananya R.",event:"Wedding",rating:5,text:"The décor and lighting looked beautiful. The planning checklist made it much easier to keep track of the details."},
+ {name:"Kiran M.",event:"College event",rating:5,text:"Our college fest had a clear schedule and the team kept the event requirements organised. Great experience overall."},
+ {name:"Priya S.",event:"Birthday",rating:4,text:"Loved the theme ideas and budget planning. It was easy to explain what we wanted for the celebration."}
+];
+let reviews=readSaved("eventFlowReviews",starterReviews.slice());
+function renderReviews(){
+ const managerGrid=$("#managerReviewList");
+ if(managerGrid) managerGrid.innerHTML=reviews.length?reviews.slice().reverse().map(r=>`<article class="review-card"><div class="review-top"><div class="review-avatar">${escapeHtml((r.name||"G").trim().charAt(0).toUpperCase())}</div><div class="review-person"><strong>${escapeHtml(r.name)}</strong><span>${escapeHtml(r.event)} · ${Number(r.rating)||0}/5 stars</span></div></div><p>${escapeHtml(r.text)}</p></article>`).join(""):`<div class="empty">No customer reviews yet.</div>`;
+ const grid=$("#reviewGrid"); if(!grid)return;
+ grid.innerHTML=reviews.slice().reverse().map(r=>`<article class="review-card"><div class="review-top"><div class="review-avatar">${escapeHtml((r.name||"G").trim().charAt(0).toUpperCase())}</div><div class="review-person"><strong>${escapeHtml(r.name)}</strong><span>${escapeHtml(r.event)} experience</span></div></div><div class="stars" aria-label="${Number(r.rating)} out of 5 stars">${"★".repeat(Number(r.rating)||0)}${"☆".repeat(5-(Number(r.rating)||0))}</div><p>${escapeHtml(r.text)}</p></article>`).join("");
+ const avg=reviews.length?reviews.reduce((sum,r)=>sum+Number(r.rating||0),0)/reviews.length:0;
+ $("#averageRating").textContent=avg.toFixed(1);$("#averageStars").textContent="★".repeat(Math.round(avg))+"☆".repeat(5-Math.round(avg));$("#reviewCount").textContent=`${reviews.length} ${reviews.length===1?"review":"reviews"}`;
+}
+$("#reviewForm").addEventListener("submit",e=>{e.preventDefault();const review={name:$("#reviewName").value.trim(),event:$("#reviewEvent").value,rating:Number($("#reviewRating").value),text:$("#reviewText").value.trim()};if(!review.name||!review.text)return;reviews.push(review);try{localStorage.setItem("eventFlowReviews",JSON.stringify(reviews))}catch(err){}renderReviews();e.target.reset();toast("Thanks for sharing your review!");});
+
+$$(".filter").forEach(b=>b.addEventListener("click",()=>{$$(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");$$(".event-card").forEach(c=>c.style.display=b.dataset.filter==="all"||c.dataset.category===b.dataset.filter?"":"none")}));
+$$("[data-event]").forEach(b=>b.addEventListener("click",()=>{$("#bookingType").value=b.dataset.event;$("#bookingTitle").value=eventLabels[b.dataset.event]+" event";showPage("planner");toast(eventLabels[b.dataset.event]+" selected. Complete the booking form on this page.")}));
+$("#bookingForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const type=$("#bookingType").value,guests=Math.max(1,Number($("#guestCount").value)||1);
+ const booking={id:nextId++,title:$("#bookingTitle").value.trim(),type,name:$("#customerName").value.trim(),contact:$("#customerContact").value.trim(),date:$("#eventDate").value,time:$("#eventTime").value,venue:$("#eventVenue").value.trim(),guests,budget:Number($("#eventBudget").value)||0,cost:estimateCost(type,guests),costManual:false,status:"pending",notes:$("#eventNotes").value.trim()};
+ bookings.unshift(booking);saveBookings();
+ $("#bookingResult").style.display="block";
+ $("#bookingResult").innerHTML="✓ Request sent for <strong>"+escapeHtml(booking.title)+"</strong>. Estimated planning cost: <strong>"+money(booking.cost)+"</strong>. The manager will review your request and confirm the final amount. Your request is visible in the manager dashboard on this browser.";
+ toast("Booking request saved. The manager can review it now.");
+});
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function attemptManagerLogin(){
+ const now=Date.now(), error=$("#loginError");
+ if(now<managerLockedUntil){error.textContent="Too many attempts. Please wait 30 seconds before trying again.";return}
+ const username=$("#managerUsername").value.trim();
+ const password=$("#managerPassword").value;
+ if(username===DEMO_MANAGER_USERNAME && password===DEMO_MANAGER_PASSWORD){
+   managerLoginFailures=0; error.textContent="";
+   $("#managerLogin").style.display="none";$("#managerDashboard").style.display="block";
+   renderBookings();renderReviews();toast("Manager dashboard opened.");
+ }else{
+   managerLoginFailures++;
+   error.textContent="Username or password is incorrect.";
+   $("#managerPassword").value="";
+   if(managerLoginFailures>=5){managerLockedUntil=Date.now()+30000;managerLoginFailures=0;error.textContent="Too many failed attempts. Login is paused for 30 seconds."}
+ }
+}
+$("#loginButton").addEventListener("click",attemptManagerLogin);
+$("#managerPassword").addEventListener("keydown",e=>{if(e.key==="Enter")attemptManagerLogin()});
+$("#managerUsername").addEventListener("keydown",e=>{if(e.key==="Enter")attemptManagerLogin()});
+$("#togglePassword").addEventListener("click",()=>{const field=$("#managerPassword"),show=field.type==="password";field.type=show?"text":"password";$("#togglePassword").textContent=show?"Hide":"Show";$("#togglePassword").setAttribute("aria-label",show?"Hide password":"Show password")});
+$("#logoutButton").addEventListener("click",()=>{$("#managerDashboard").style.display="none";$("#managerLogin").style.display="block";$("#managerPassword").value="";$("#loginError").textContent="";toast("Dashboard locked.")});
+$("#searchBookings").addEventListener("input",renderBookings);$("#statusFilter").addEventListener("change",renderBookings);
+$("#addDemoBooking").addEventListener("click",()=>{bookings.unshift({id:nextId++,title:"New sample event",type:"party",name:"Demo customer",contact:"demo@example.com",date:"2026-11-30",time:"18:00",venue:"Sample venue",guests:80,budget:40000,cost:estimateCost("party",80),status:"pending",notes:"Sample request — edit the details"});saveBookings();renderBookings();toast("Sample booking added.")});
+function renderBookings(){
+ saveBookings();
+ const q=($("#searchBookings").value||"").toLowerCase(),status=$("#statusFilter").value;
+ const list=bookings.filter(b=>(status==="all"||b.status===status)&&[b.title,b.name,b.contact,b.type].join(" ").toLowerCase().includes(q));
+ $("#statTotal").textContent=bookings.length;$("#statPending").textContent=bookings.filter(b=>b.status==="pending").length;$("#statApproved").textContent=bookings.filter(b=>b.status==="approved").length;$("#statValue").textContent=money(bookings.filter(b=>b.status==="approved").reduce((s,b)=>s+Number(b.cost),0));
+ $("#bookingList").innerHTML=list.length?list.map(b=>`<article class="booking-card"><div class="booking-main"><div class="booking-symbol">${symbols[b.type]||"✳"}</div><div><h3>${escapeHtml(b.title)}</h3><div class="booking-meta"><span>👤 ${escapeHtml(b.name)}</span><span>✉ ${escapeHtml(b.contact)}</span><span>▦ ${escapeHtml(b.date||"Date not set")}</span><span>◷ ${escapeHtml(b.time||"Time not set")}</span><span>⌖ ${escapeHtml(b.venue||"Venue not set")}</span><span>♧ ${Number(b.guests)} guests</span></div><div class="booking-meta"><span>Budget: <strong>${money(b.budget)}</strong></span><span>Current estimate: <strong>${money(b.cost)}</strong></span></div><span class="status ${b.status}">${b.status}</span>${b.notes?`<div class="booking-meta">Note: ${escapeHtml(b.notes)}</div>`:""}</div></div><div class="booking-actions"><button data-action="edit" data-id="${b.id}">✎ Edit details</button><button data-action="whatsapp" data-id="${b.id}">WhatsApp customer</button>${b.status!=="approved"?`<button class="approve" data-action="approve" data-id="${b.id}">✓ Approve</button>`:""}${b.status!=="rejected"?`<button class="reject" data-action="reject" data-id="${b.id}">Decline</button>`:""}<button data-action="delete" data-id="${b.id}">Delete</button></div></article>`).join(""):'<div class="empty">No bookings match your search. Try another filter or add a sample request.</div>';
+}
+$("#bookingList").addEventListener("click",e=>{const btn=e.target.closest("button[data-action]");if(!btn)return;const id=Number(btn.dataset.id),b=bookings.find(x=>x.id===id);if(!b)return;const action=btn.dataset.action;
+if(action==="approve"){b.status="approved";saveBookings();renderBookings();toast("Booking approved in this demo.")}
+if(action==="reject"){b.status="rejected";saveBookings();renderBookings();toast("Booking marked as declined.")}
+if(action==="delete"){if(confirm("Delete this demo booking?")){bookings=bookings.filter(x=>x.id!==id);saveBookings();renderBookings();toast("Booking deleted from this demo.")}}
+if(action==="whatsapp"){
+ let phone=String(b.contact||"").replace(/\D/g,"");
+ if(phone.length===10)phone="91"+phone;
+ if(phone.length<10){toast("This booking has no valid WhatsApp phone number. Ask the customer for a number with country code.");return}
+ const message=`Hello ${b.name}, your ${b.title} request has been reviewed.\nEvent type: ${eventLabels[b.type]||b.type}\nDate: ${b.date}\nTime: ${b.time||"To be confirmed"}\nVenue: ${b.venue||"To be confirmed"}\nGuests: ${b.guests}\nEstimated / final price: ${money(b.cost)}\nYour budget: ${money(b.budget)}\n${b.cost>b.budget?`Additional amount: ${money(b.cost-b.budget)}\n`:""}Booking status: ${b.status.toUpperCase()}\nThank you.`;
+ window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`,"_blank","noopener");
+}
+if(action==="edit"){const title=prompt("Event name:",b.title);if(title===null)return;const name=prompt("Customer name:",b.name);if(name===null)return;const contact=prompt("Phone or email:",b.contact);if(contact===null)return;const date=prompt("Event date (YYYY-MM-DD):",b.date);if(date===null)return;const guests=prompt("Number of guests:",b.guests);if(guests===null)return;const venue=prompt("Venue / location:",b.venue||"");if(venue===null)return;const time=prompt("Event time (HH:MM):",b.time||"");if(time===null)return;const budget=prompt("Customer budget in rupees:",b.budget);if(budget===null)return;const suggestedCost=estimateCost(b.type,Math.max(1,Number(guests)||b.guests));const cost=prompt("Updated final cost in rupees (suggested amount is based on guest count):",suggestedCost);if(cost===null)return;const notes=prompt("Manager notes / requirements:",b.notes||"");if(notes===null)return;b.title=title.trim()||b.title;b.name=name.trim()||b.name;b.contact=contact.trim()||b.contact;b.date=date;b.time=time;b.venue=venue;b.guests=Math.max(1,Number(guests)||b.guests);b.budget=Math.max(0,Number(budget)||b.budget);b.cost=Math.max(0,cost.trim()===""?suggestedCost:(Number(cost)||suggestedCost));b.costManual=cost.trim()!=="";b.notes=notes;saveBookings();renderBookings();toast("Booking details and estimated costs updated.")}});
+</script>
+</body></html>
