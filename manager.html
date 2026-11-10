@@ -545,7 +545,7 @@ body.manager-standalone .manager-warning{overflow-wrap:anywhere}
 <header class="topbar">
  <a class="brand" href="#home"><span class="brand-mark">¥</span><span>EVENT<span> PLANNER</span></span></a>
  <nav class="navlinks"><a href="#home" data-page="home">Home</a><a href="#experiences" data-page="experiences">Events</a><a href="#planner" data-page="planner">Book an event</a><a href="#about" data-page="about">About</a><a href="#reviews" data-page="reviews">Reviews</a><a href="#manager" data-page="manager">Manager Portal</a></nav>
- <div class="nav-actions"><a class="btn btn-outline" href="#manager" data-page="manager">Manager</a><a class="btn btn-dark" href="#planner" data-page="planner">Book an event ↗</a></div>
+ <div class="nav-actions"><a class="btn btn-outline" href="/">Customer website</a><a class="btn btn-dark" href="#manager" data-page="manager">Manager portal</a></div>
 </header>
 <main>
 <section class="hero nexus-home" id="home">
@@ -731,8 +731,12 @@ function estimateCost(type,guests){return Math.round((perGuestRates[type]||500)*
 function updateLiveEstimate(){const el=$("#liveEstimate");if(el)el.textContent="Estimated cost: "+money(estimateCost($("#bookingType").value,$("#guestCount").value));}
 $("#guestCount").addEventListener("input",updateLiveEstimate);$("#bookingType").addEventListener("change",updateLiveEstimate);
 function money(n){return "₹"+Math.max(0,Math.round(Number(n)||0)).toLocaleString("en-IN")}
-window.addEventListener("DOMContentLoaded",()=>{showPage(location.hash.slice(1)||"manager",false);renderReviews();updateLiveEstimate();});
-window.addEventListener("storage",e=>{if(e.key==="eventFlowBookings"){bookings=readSaved("eventFlowBookings",[]);nextId=Math.max(0,...bookings.map(b=>Number(b.id)||0))+1;if($("#managerDashboard").style.display!=="none")renderBookings()}if(e.key==="eventFlowReviews"){reviews=readSaved("eventFlowReviews",[]);renderReviews()}});
+window.addEventListener("DOMContentLoaded",()=>{showPage("manager",false);refreshSharedData();updateLiveEstimate();});
+window.addEventListener("storage",e=>{
+ if(e.key==="eventFlowBookings"||e.key==="eventFlowReviews") refreshSharedData();
+});
+window.addEventListener("focus",()=>refreshSharedData());
+window.addEventListener("pageshow",()=>refreshSharedData());
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3300)}
 
 const starterReviews=[
@@ -741,6 +745,17 @@ const starterReviews=[
  {name:"Priya S.",event:"Birthday",rating:4,text:"Loved the theme ideas and budget planning. It was easy to explain what we wanted for the celebration."}
 ];
 let reviews=readSaved("eventFlowReviews",starterReviews.slice());
+
+// Both index.html and manager.html use these exact same keys.
+// Since both pages are on the same Vercel domain, the same browser shares this data.
+function refreshSharedData(){
+ bookings=readSaved("eventFlowBookings",starterBookings.slice());
+ reviews=readSaved("eventFlowReviews",starterReviews.slice());
+ nextId=Math.max(0,...bookings.map(b=>Number(b.id)||0))+1;
+ renderReviews();
+ const dashboard=$("#managerDashboard");
+ if(dashboard && dashboard.style.display!=="none") renderBookings();
+}
 function saveReviews(){
  try{localStorage.setItem("eventFlowReviews",JSON.stringify(reviews));return true}
  catch(err){toast("Could not save this review in browser storage. Please try again.");return false}
@@ -795,12 +810,8 @@ function attemptManagerLogin(){
    const loginPanel=$("#managerLogin"), dashboard=$("#managerDashboard");
    loginPanel.hidden=true; loginPanel.style.display="none";
    dashboard.hidden=false; dashboard.style.display="block";
-   reviews=readSaved("eventFlowReviews",starterReviews.slice());
-   bookings=readSaved("eventFlowBookings",starterBookings.slice());
-   if(!Array.isArray(bookings))bookings=starterBookings.slice();
-   if(!Array.isArray(reviews))reviews=starterReviews.slice();
-   nextId=Math.max(0,...bookings.map(b=>Number(b.id)||0))+1;
-   renderBookings();renderReviews();
+   refreshSharedData();
+   renderBookings();
    dashboard.scrollIntoView({behavior:"smooth",block:"start"});
    toast("Manager portal opened. Your saved bookings and reviews are loaded.");
  }else{
